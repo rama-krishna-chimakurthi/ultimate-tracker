@@ -17,7 +17,11 @@ const topTabs = createMaterialTopTabNavigator();
 
 const TopTabsNavigator = () => {
   return (
-    <topTabs.Navigator>
+    <topTabs.Navigator
+      screenOptions={{
+        lazy: true,
+      }}
+    >
       <topTabs.Screen name="Home" component={Home} />
       <topTabs.Screen name="Assets" component={AssetsScreen} />
       <topTabs.Screen name="Categories" component={CategoriesScreen} />
