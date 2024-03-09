@@ -22,11 +22,16 @@ export interface FiananceAsset {
 export interface FiananceTransaction {
     id: number,
     category_id: number;
-    from_asset: number;
-    to_asset: number;
+    from_asset: number | undefined;
+    to_asset: number | undefined;
     amount: number;
     date: number;
     name: string;
     description: string;
     type: 'Expense' | 'Income' | 'Difference' | 'Transfer';
+}
+
+export interface TransactionsByMonth {
+    totalExpenses: number;
+    totalIncome: number;
 }

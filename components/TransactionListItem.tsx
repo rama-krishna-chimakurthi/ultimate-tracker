@@ -23,7 +23,11 @@ export default function TransactionListItem({
   fromAsset,
 }: TransactionListItemProps) {
   const iconName =
-    transaction.type === "Expense" ? "minuscircle" : "pluscircle";
+    transaction.type === "Expense"
+      ? "minuscircle"
+      : transaction.type === "Income"
+      ? "pluscircle"
+      : undefined;
   const color = transaction.type === "Expense" ? "red" : "green";
   const categoryColor = categoryColors[categoryInfo?.name ?? "Default"];
   const emoji = categoryEmojies[categoryInfo?.name ?? "Default"];
@@ -111,13 +115,13 @@ function Amount({
   color,
   amount,
 }: {
-  iconName: "minuscircle" | "pluscircle";
+  iconName: "minuscircle" | "pluscircle" | undefined;
   color: string;
   amount: number;
 }) {
   return (
     <View style={styles.row}>
-      <AntDesign name={iconName} size={18} color={color} />
+      {iconName && <AntDesign name={iconName} size={18} color={color} />}
       <AutoSizeText
         fontSize={32}
         mode={ResizeTextMode.max_lines}

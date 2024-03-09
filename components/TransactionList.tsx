@@ -37,7 +37,7 @@ const TransactionList = ({
           <TouchableOpacity
             key={transaction.id}
             activeOpacity={0.7}
-            onLongPress={() => deleteTransaction(transaction.id)}
+            onLongPress={() => deleteTransaction(transaction.id!)}
           >
             <TransactionListItem
               transaction={transaction}
