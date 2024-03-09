@@ -14,12 +14,14 @@ const TransactionList = ({
   assetGroups,
   assets,
   deleteTransaction,
+  editTransaction,
 }: {
   transactions: FiananceTransaction[];
   categories: FiananceCategory[];
   assetGroups: FiananceAssetGroup[];
   assets: FiananceAsset[];
   deleteTransaction: (transactionId: number) => Promise<void>;
+  editTransaction: (transaction: FiananceTransaction) => void;
 }) => {
   return (
     <View style={{ gap: 15 }}>
@@ -38,6 +40,7 @@ const TransactionList = ({
             key={transaction.id}
             activeOpacity={0.7}
             onLongPress={() => deleteTransaction(transaction.id!)}
+            onPress={() => editTransaction(transaction)}
           >
             <TransactionListItem
               transaction={transaction}

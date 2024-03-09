@@ -1,11 +1,9 @@
 import {
-  Button,
   Text,
   TextInput,
   TouchableOpacity,
   View,
   Modal,
-  ScrollView,
   Pressable,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -27,9 +25,11 @@ const transactionTypes = ["Expense", "Income", "Transfer"];
 
 export default function AddTransaction({
   assets,
+  transaction,
   insertTransaction,
 }: {
   assets: FiananceAsset[];
+  transaction: FiananceTransaction | undefined;
   insertTransaction(transaction: FiananceTransaction): Promise<void>;
 }) {
   const [isAddingTransaction, setIsAddingTransaction] =
@@ -67,6 +67,20 @@ export default function AddTransaction({
   useEffect(() => {
     getExpenseType(currentTab);
   }, [currentTab]);
+
+  useEffect(() => {
+    if (transaction) {
+      setAmount(transaction.amount.toString());
+      setDescription(transaction.description);
+      setName(transaction.name);
+      setCategoryId(transaction.category_id);
+      if (transaction.from_asset) setFromAssetId(transaction.from_asset);
+      if (transaction.to_asset) setToAssetId(transaction.to_asset);
+      setDate(new Date(transaction.date * 1000));
+      setTypeOfTransaction(transaction.type);
+      setIsAddingTransaction(true);
+    }
+  }, [transaction]);
 
   async function getExpenseType(currentTab: number) {
     const type = transactionTypes[currentTab];
@@ -141,6 +155,7 @@ export default function AddTransaction({
           <Card>
             <TextInput
               placeholder="₹Amount"
+              value={amount}
               style={{ fontSize: 32, marginBottom: 15, fontWeight: "bold" }}
               keyboardType="numeric"
               onChangeText={(text) => {
@@ -151,11 +166,13 @@ export default function AddTransaction({
             />
             <TextInput
               placeholder="Name"
+              value={name}
               style={{ fontSize: 20, marginBottom: 15, fontWeight: "bold" }}
               onChangeText={setName}
             />
             <TextInput
               placeholder="Description"
+              value={description}
               style={{ marginBottom: 15 }}
               onChangeText={setDescription}
             />
@@ -217,7 +234,7 @@ export default function AddTransaction({
                 key={cat.name}
                 id={cat.id}
                 title={cat.name}
-                isSelected={categorySelected === cat.name}
+                isSelected={categoryId === cat.id}
                 setTypeSelected={setCategorySelected}
                 setCategoryId={setCategoryId}
               />
@@ -232,7 +249,7 @@ export default function AddTransaction({
                     key={asset.name}
                     id={asset.id}
                     title={asset.name}
-                    isSelected={fromAssetSelected === asset.name}
+                    isSelected={fromAssetId === asset.id}
                     setTypeSelected={setFromAssetSelected}
                     setCategoryId={setFromAssetId}
                   />
@@ -249,7 +266,7 @@ export default function AddTransaction({
                     key={asset.name}
                     id={asset.id}
                     title={asset.name}
-                    isSelected={toAssetSelected === asset.name}
+                    isSelected={toAssetId === asset.id}
                     setTypeSelected={setToAssetSelected}
                     setCategoryId={setToAssetId}
                   />

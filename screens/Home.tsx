@@ -25,6 +25,10 @@ const Home = () => {
   const [assetGroups, setAssetGroups] = useState<FiananceAssetGroup[]>([]);
   const [assets, setAssets] = useState<FiananceAsset[]>([]);
 
+  const [editTransaction, setEditTransaction] = useState<
+    FiananceTransaction | undefined
+  >(undefined);
+
   const [transactionsByMonth, setTransactionsByMonth] =
     useState<TransactionsByMonth>({
       totalExpenses: 0,
@@ -38,6 +42,11 @@ const Home = () => {
       await getData();
     });
   }, [db]);
+
+  const editTransactionClicked = (transaction: FiananceTransaction) => {
+    console.log("editTransactionClicked", transaction);
+    setEditTransaction(transaction);
+  };
 
   const getData = async () => {
     const resultCategory = await db.getAllAsync<FiananceCategory>(
@@ -118,7 +127,11 @@ const Home = () => {
   return (
     <View>
       <ScrollView contentContainerStyle={{ padding: 15, paddingVertical: 30 }}>
-        <AddTransaction insertTransaction={insertTransaction} assets={assets} />
+        <AddTransaction
+          insertTransaction={insertTransaction}
+          assets={assets}
+          transaction={editTransaction}
+        />
         <TransactionSummary
           totalExpenses={transactionsByMonth.totalExpenses}
           totalIncome={transactionsByMonth.totalIncome}
@@ -129,6 +142,7 @@ const Home = () => {
           categories={categories}
           transactions={transactions}
           deleteTransaction={deleteTransaction}
+          editTransaction={editTransactionClicked}
         />
       </ScrollView>
     </View>
