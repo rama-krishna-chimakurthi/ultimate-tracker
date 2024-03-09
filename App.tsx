@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
@@ -7,9 +6,24 @@ import { SQLiteProvider } from "expo-sqlite/next";
 import Home from "./screens/Home";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import AssetsScreen from "./screens/AssetsScreen";
+import CategoriesScreen from "./screens/CategoriesScreen";
 
 const dbName = "ultimate-tracker.db";
 const Stack = createNativeStackNavigator();
+
+const topTabs = createMaterialTopTabNavigator();
+
+const TopTabsNavigator = () => {
+  return (
+    <topTabs.Navigator>
+      <topTabs.Screen name="Home" component={Home} />
+      <topTabs.Screen name="Assets" component={AssetsScreen} />
+      <topTabs.Screen name="Categories" component={CategoriesScreen} />
+    </topTabs.Navigator>
+  );
+};
 
 const loadDatabase = async () => {
   const dbAsset = require(`./assets/${dbName}`);
@@ -56,8 +70,8 @@ export default function App() {
         <SQLiteProvider databaseName={dbName} useSuspense>
           <Stack.Navigator>
             <Stack.Screen
-              name="Home"
-              component={Home}
+              name="main"
+              component={TopTabsNavigator}
               options={{
                 headerTitle: "Finance Tracker",
                 headerLargeTitle: true,
