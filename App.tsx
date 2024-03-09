@@ -59,7 +59,7 @@ export default function App() {
               name="Home"
               component={Home}
               options={{
-                headerTitle: "Ultimate Tracker",
+                headerTitle: "Finance Tracker",
                 headerLargeTitle: true,
               }}
             />
