@@ -2,11 +2,13 @@ import { View, Text } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite/next";
 import { SumOfTransactionsByMonth } from "../model/types";
+import { VictoryPie } from "victory-native";
 
 const CategoriesScreen = () => {
   const [categorysSummary, setCategoriesSummary] = useState<
     SumOfTransactionsByMonth[]
   >([]);
+  const [data, setData] = useState<{ x: string; y: number }[]>([]);
 
   const query = `
   SELECT 
@@ -46,11 +48,24 @@ const CategoriesScreen = () => {
 
     console.log(result);
     setCategoriesSummary(result);
+
+    setData([]);
+    const dataTemp: { x: string; y: number }[] = [];
+    result.forEach((category) => {
+      dataTemp.push({
+        x: category.name,
+        y: category.totalIncome + category.totalExpenses,
+      });
+    });
+    console.log(dataTemp);
+    setData(dataTemp);
+    console.log(data);
   };
 
   return (
     <View>
       <Text>CategoriesScreen</Text>
+      <VictoryPie data={data} />
     </View>
   );
 };
