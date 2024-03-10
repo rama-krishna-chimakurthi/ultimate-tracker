@@ -78,6 +78,7 @@ INSERT INTO finance_categories (name, type) VALUES ('Online Sales', 'Income');
 INSERT INTO finance_categories (name, type) VALUES ('Freelance Writing', 'Income');
 INSERT INTO finance_categories (name, type) VALUES ('End of Year Bonus', 'Income');
 INSERT INTO finance_categories (name, type) VALUES ('Thanksgiving Freelance', 'Income');
+INSERT INTO finance_categories (name, type) VALUES ('Salary', 'Income');
 
 
 -- 4. confirm data was inserted
