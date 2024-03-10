@@ -5,6 +5,7 @@ import {
   View,
   Modal,
   Pressable,
+  ScrollView,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import Card from "./ui/Card";
@@ -205,174 +206,178 @@ export default function AddTransaction({
             backgroundColor: "rgba(0,0,0,0.7)",
           }}
         >
-          <Card>
-            <TextInput
-              placeholder="₹Amount"
-              value={amount}
-              style={{ fontSize: 32, marginBottom: 15, fontWeight: "bold" }}
-              keyboardType="numeric"
-              onChangeText={(text) => {
-                // Remove any non-numeric characters before setting the state
-                const numericValue = text.replace(/[^0-9.]/g, "");
-                setAmount(numericValue);
-              }}
-            />
-            <TextInput
-              placeholder="Name"
-              value={name}
-              style={{ fontSize: 20, marginBottom: 15, fontWeight: "bold" }}
-              onChangeText={setName}
-            />
-            <TextInput
-              placeholder="Description"
-              value={description}
-              style={{ marginBottom: 15 }}
-              onChangeText={setDescription}
-            />
-            <Text style={{ marginBottom: 6 }}>Select Transaction Date</Text>
-            <View style={{ flexDirection: "row", gap: 10, paddingBottom: 10 }}>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsDatePickerVisible(true);
+          <Card style={{ height: 700 }}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <TextInput
+                placeholder="₹Amount"
+                value={amount}
+                style={{ fontSize: 32, marginBottom: 15, fontWeight: "bold" }}
+                keyboardType="numeric"
+                onChangeText={(text) => {
+                  // Remove any non-numeric characters before setting the state
+                  const numericValue = text.replace(/[^0-9.]/g, "");
+                  setAmount(numericValue);
                 }}
-              >
-                <Text style={{ fontSize: 15, fontWeight: "bold" }}>
-                  {date.toLocaleDateString("default", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  setIsTimePickerVisible(true);
-                }}
-              >
-                <Text style={{ fontSize: 15, fontWeight: "bold" }}>
-                  {date.toLocaleTimeString("default", {
-                    hour: "numeric",
-                    minute: "numeric",
-                  })}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            {isDatePickerVisible && (
-              <DateTimePicker
-                mode="date"
-                maximumDate={new Date()}
-                value={date}
-                onChange={onChangeDate}
               />
-            )}
-            {isTimePickerVisible && (
-              <DateTimePicker
-                mode="time"
-                maximumDate={new Date()}
-                value={date}
-                onChange={onChangeDate}
+              <TextInput
+                placeholder="Name"
+                value={name}
+                style={{ fontSize: 20, marginBottom: 15, fontWeight: "bold" }}
+                onChangeText={setName}
               />
-            )}
-            <Text style={{ marginBottom: 6 }}>Select a entry type</Text>
-            <SegmentedControl
-              values={transactionTypes}
-              style={{ marginBottom: 15 }}
-              selectedIndex={currentTab}
-              onChange={(event) => {
-                setCurrentTab(+event.nativeEvent.selectedSegmentIndex);
-                switch (currentTab) {
-                  case 0:
-                    setToAssetId(0);
-                    break;
-                  case 1:
-                    setFromAssetId(0);
-                    break;
-                }
-              }}
-            />
-            {categories.map((cat) => (
-              <CategoryOrAssetButton
-                key={cat.name}
-                id={cat.id}
-                title={cat.name}
-                isSelected={categoryId === cat.id}
-                setTypeSelected={setCategorySelected}
-                setCategoryId={setCategoryId}
+              <TextInput
+                placeholder="Description"
+                value={description}
+                style={{ marginBottom: 15 }}
+                onChangeText={setDescription}
               />
-            ))}
-            {/* From Asset */}
-            {(typeOfTransaction === "Transfer" ||
-              typeOfTransaction === "Expense") && (
-              <View>
-                <Text style={{ marginBottom: 6 }}>Select a From Asset</Text>
-                {assets.map((asset) => (
-                  <CategoryOrAssetButton
-                    key={asset.name}
-                    id={asset.id}
-                    title={asset.name}
-                    isSelected={fromAssetId === asset.id}
-                    setTypeSelected={setFromAssetSelected}
-                    setCategoryId={setFromAssetId}
-                  />
-                ))}
-              </View>
-            )}
-            {/* To Asset */}
-            {(typeOfTransaction === "Transfer" ||
-              typeOfTransaction === "Income") && (
-              <View>
-                <Text style={{ marginBottom: 6 }}>Select a To Asset</Text>
-                {assets.map((asset) => (
-                  <CategoryOrAssetButton
-                    key={asset.name}
-                    id={asset.id}
-                    title={asset.name}
-                    isSelected={toAssetId === asset.id}
-                    setTypeSelected={setToAssetSelected}
-                    setCategoryId={setToAssetId}
-                  />
-                ))}
-              </View>
-            )}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-around",
-                padding: 15,
-              }}
-            >
-              <Pressable
-                style={{
-                  backgroundColor: "red",
-                  minWidth: 150,
-                  minHeight: 40,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={() => {
-                  removeTransaction();
-                  setIsAddingTransaction(false);
-                }}
+              <Text style={{ marginBottom: 6 }}>Select Transaction Date</Text>
+              <View
+                style={{ flexDirection: "row", gap: 10, paddingBottom: 10 }}
               >
-                <Text
-                  style={{ fontSize: 15, fontWeight: "bold", color: "white" }}
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsDatePickerVisible(true);
+                  }}
                 >
-                  Cancel
-                </Text>
-              </Pressable>
-              <Pressable
-                style={{
-                  backgroundColor: "#4682B4",
-                  minWidth: 150,
-                  minHeight: 40,
-                  justifyContent: "center",
-                  alignItems: "center",
+                  <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+                    {date.toLocaleDateString("default", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsTimePickerVisible(true);
+                  }}
+                >
+                  <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+                    {date.toLocaleTimeString("default", {
+                      hour: "numeric",
+                      minute: "numeric",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              {isDatePickerVisible && (
+                <DateTimePicker
+                  mode="date"
+                  maximumDate={new Date()}
+                  value={date}
+                  onChange={onChangeDate}
+                />
+              )}
+              {isTimePickerVisible && (
+                <DateTimePicker
+                  mode="time"
+                  maximumDate={new Date()}
+                  value={date}
+                  onChange={onChangeDate}
+                />
+              )}
+              <Text style={{ marginBottom: 6 }}>Select a entry type</Text>
+              <SegmentedControl
+                values={transactionTypes}
+                style={{ marginBottom: 15 }}
+                selectedIndex={currentTab}
+                onChange={(event) => {
+                  setCurrentTab(+event.nativeEvent.selectedSegmentIndex);
+                  switch (currentTab) {
+                    case 0:
+                      setToAssetId(0);
+                      break;
+                    case 1:
+                      setFromAssetId(0);
+                      break;
+                  }
                 }}
-                onPress={handleSave}
+              />
+              {categories.map((cat) => (
+                <CategoryOrAssetButton
+                  key={cat.name}
+                  id={cat.id}
+                  title={cat.name}
+                  isSelected={categoryId === cat.id}
+                  setTypeSelected={setCategorySelected}
+                  setCategoryId={setCategoryId}
+                />
+              ))}
+              {/* From Asset */}
+              {(typeOfTransaction === "Transfer" ||
+                typeOfTransaction === "Expense") && (
+                <View>
+                  <Text style={{ marginBottom: 6 }}>Select a From Asset</Text>
+                  {assets.map((asset) => (
+                    <CategoryOrAssetButton
+                      key={asset.name}
+                      id={asset.id}
+                      title={asset.name}
+                      isSelected={fromAssetId === asset.id}
+                      setTypeSelected={setFromAssetSelected}
+                      setCategoryId={setFromAssetId}
+                    />
+                  ))}
+                </View>
+              )}
+              {/* To Asset */}
+              {(typeOfTransaction === "Transfer" ||
+                typeOfTransaction === "Income") && (
+                <View>
+                  <Text style={{ marginBottom: 6 }}>Select a To Asset</Text>
+                  {assets.map((asset) => (
+                    <CategoryOrAssetButton
+                      key={asset.name}
+                      id={asset.id}
+                      title={asset.name}
+                      isSelected={toAssetId === asset.id}
+                      setTypeSelected={setToAssetSelected}
+                      setCategoryId={setToAssetId}
+                    />
+                  ))}
+                </View>
+              )}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  padding: 15,
+                }}
               >
-                <Text style={{ fontSize: 15, color: "white" }}>Save</Text>
-              </Pressable>
-            </View>
+                <Pressable
+                  style={{
+                    backgroundColor: "red",
+                    minWidth: 150,
+                    minHeight: 40,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => {
+                    removeTransaction();
+                    setIsAddingTransaction(false);
+                  }}
+                >
+                  <Text
+                    style={{ fontSize: 15, fontWeight: "bold", color: "white" }}
+                  >
+                    Cancel
+                  </Text>
+                </Pressable>
+                <Pressable
+                  style={{
+                    backgroundColor: "#4682B4",
+                    minWidth: 150,
+                    minHeight: 40,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={handleSave}
+                >
+                  <Text style={{ fontSize: 15, color: "white" }}>Save</Text>
+                </Pressable>
+              </View>
+            </ScrollView>
           </Card>
         </View>
       </Modal>
@@ -387,7 +392,7 @@ export default function AddTransaction({
   );
 }
 
-function CategoryOrAssetButton({
+export const CategoryOrAssetButton = ({
   id,
   title,
   isSelected,
@@ -399,7 +404,7 @@ function CategoryOrAssetButton({
   isSelected: boolean;
   setTypeSelected: Dispatch<SetStateAction<string>>;
   setCategoryId: Dispatch<SetStateAction<number>>;
-}) {
+}) => {
   return (
     <TouchableOpacity
       onPress={() => {
@@ -428,13 +433,13 @@ function CategoryOrAssetButton({
       </Text>
     </TouchableOpacity>
   );
-}
+};
 
-function AddButton({
+export const AddButton = ({
   setIsAddingTransaction,
 }: {
   setIsAddingTransaction: Dispatch<SetStateAction<boolean>>;
-}) {
+}) => {
   return (
     <TouchableOpacity
       onPress={() => setIsAddingTransaction(true)}
@@ -455,4 +460,4 @@ function AddButton({
       </Text>
     </TouchableOpacity>
   );
-}
+};

@@ -17,6 +17,7 @@ import {
 import TransactionList from "../components/TransactionList";
 import Card from "../components/ui/Card";
 import AddTransaction from "../components/AddTransaction";
+import { useIsFocused } from "@react-navigation/native";
 
 const Home = () => {
   const [categories, setCategories] = useState<FiananceCategory[]>([]);
@@ -36,15 +37,16 @@ const Home = () => {
     });
 
   const db = useSQLiteContext();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     db.withTransactionAsync(async () => {
       await getData();
     });
-  }, [db]);
+  }, [db, isFocused == true]);
 
   const editTransactionClicked = (transaction: FiananceTransaction) => {
-    console.log("editTransactionClicked", transaction);
+    //console.log("editTransactionClicked", transaction);
     setEditTransaction(transaction);
   };
 
@@ -56,10 +58,12 @@ const Home = () => {
       `SELECT * FROM ${transactionTabelName} ORDER BY date DESC`
     );
     const resultAssetGroup = await db.getAllAsync<FiananceAssetGroup>(
-      `SELECT * FROM ${assetGroupTableName}`
+      `SELECT * FROM ${assetGroupTableName} WHERE isDeleted = ?`,
+      [0]
     );
     const resultAssets = await db.getAllAsync<FiananceAsset>(
-      `SELECT * FROM ${assetTableName}`
+      `SELECT * FROM ${assetTableName} WHERE isDeleted = ?`,
+      [0]
     );
 
     setCategories(resultCategory);
@@ -135,7 +139,7 @@ const Home = () => {
   };
 
   const deleteTransaction = async (id: number) => {
-    console.log("Delete Transaction 🌋 - id = " + id);
+    //console.log("Delete Transaction 🌋 - id = " + id);
     await db.withTransactionAsync(async () => {
       await db.runAsync(`DELETE FROM ${transactionTabelName} WHERE id = ?;`, [
         id,

@@ -110,7 +110,7 @@ function CategoryItem({
   );
 }
 
-function Amount({
+export const Amount = ({
   iconName,
   color,
   amount,
@@ -118,7 +118,7 @@ function Amount({
   iconName: "minuscircle" | "pluscircle" | undefined;
   color: string;
   amount: number;
-}) {
+}) => {
   return (
     <View style={styles.row}>
       {iconName && <AntDesign name={iconName} size={18} color={color} />}
@@ -132,7 +132,7 @@ function Amount({
       </AutoSizeText>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   amount: {

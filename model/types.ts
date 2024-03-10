@@ -16,7 +16,7 @@ export interface FiananceAsset {
     name: string;
     asset_group_id: number;
     isDeleted: boolean;
-    settlement_day: number;
+    settlement_day: number | undefined;
 }
 
 export interface FiananceTransaction {
