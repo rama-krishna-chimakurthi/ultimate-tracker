@@ -27,10 +27,12 @@ export default function AddTransaction({
   assets,
   transaction,
   insertTransaction,
+  removeTransaction,
 }: {
   assets: FiananceAsset[];
   transaction: FiananceTransaction | undefined;
   insertTransaction(transaction: FiananceTransaction): Promise<void>;
+  removeTransaction(): void;
 }) {
   const [isAddingTransaction, setIsAddingTransaction] =
     useState<boolean>(false);
@@ -288,7 +290,10 @@ export default function AddTransaction({
                   justifyContent: "center",
                   alignItems: "center",
                 }}
-                onPress={() => setIsAddingTransaction(false)}
+                onPress={() => {
+                  removeTransaction();
+                  setIsAddingTransaction(false);
+                }}
               >
                 <Text
                   style={{ fontSize: 15, fontWeight: "bold", color: "white" }}

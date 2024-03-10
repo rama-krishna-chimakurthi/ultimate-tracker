@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite/next";
 import { assetGroupTableName, assetTableName } from "../model/constants";
 import { FiananceAsset, FiananceAssetGroup } from "../model/types";
+import AssetGroupView from "../components/AssetGroupView";
 
 const AssetsScreen = () => {
   const [assetGroups, setAssetGroups] = useState<FiananceAssetGroup[]>([]);
@@ -32,7 +33,20 @@ const AssetsScreen = () => {
 
   return (
     <View>
-      <Text>AssetsScreen</Text>
+      {assetGroups.map((assetGroup) => {
+        return (
+          <View>
+            <AssetGroupView
+              assetGroup={assetGroup}
+              assets={assets.filter(
+                (asset) =>
+                  asset.asset_group_id === assetGroup.id && !asset.isDeleted
+              )}
+            />
+            ;
+          </View>
+        );
+      })}
     </View>
   );
 };

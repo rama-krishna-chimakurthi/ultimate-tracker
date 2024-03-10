@@ -131,6 +131,9 @@ const Home = () => {
           insertTransaction={insertTransaction}
           assets={assets}
           transaction={editTransaction}
+          removeTransaction={() => {
+            setEditTransaction(undefined);
+          }}
         />
         <TransactionSummary
           totalExpenses={transactionsByMonth.totalExpenses}
