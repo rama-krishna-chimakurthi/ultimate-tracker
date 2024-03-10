@@ -132,7 +132,7 @@ export default function AddTransaction({
 
     switch (typeOfTransaction) {
       case "Expense":
-        if (fromAssetId < 0 || toAssetId >= 0) {
+        if (fromAssetId <= 0 || toAssetId > 0) {
           console.log(
             "invalid Expense. From asset should not be empty. To asset should be empty"
           );
@@ -140,15 +140,17 @@ export default function AddTransaction({
         }
         break;
       case "Income":
-        if (fromAssetId >= 0 || toAssetId < 0) {
+        if (fromAssetId > 0 || toAssetId <= 0) {
+          console.log("from asset id: " + fromAssetId);
+          console.log("to asset id: " + toAssetId);
           console.log(
-            "invalid Expense. From asset should be empty. To asset should not be empty"
+            "invalid Income. From asset should be empty. To asset should not be empty"
           );
           return;
         }
         break;
       case "Transfer":
-        if (fromAssetId < 0 || toAssetId < 0) {
+        if (fromAssetId <= 0 || toAssetId <= 0) {
           console.log(
             "invalid Expense. From asset should not be empty. To asset should not be empty"
           );
@@ -156,7 +158,7 @@ export default function AddTransaction({
         }
         break;
     }
-    if (!amount || !date || categoryId > 0) {
+    if (!amount || !date || categoryId <= 0) {
       console.log("Invalid amount or category or date is invalid.");
       return;
     }
@@ -278,6 +280,14 @@ export default function AddTransaction({
               selectedIndex={currentTab}
               onChange={(event) => {
                 setCurrentTab(+event.nativeEvent.selectedSegmentIndex);
+                switch (currentTab) {
+                  case 0:
+                    setToAssetId(0);
+                    break;
+                  case 1:
+                    setFromAssetId(0);
+                    break;
+                }
               }}
             />
             {categories.map((cat) => (

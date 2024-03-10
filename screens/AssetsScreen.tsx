@@ -4,8 +4,10 @@ import { useSQLiteContext } from "expo-sqlite/next";
 import { assetGroupTableName, assetTableName } from "../model/constants";
 import { FiananceAsset, FiananceAssetGroup } from "../model/types";
 import AssetGroupView from "../components/AssetGroupView";
+import { useIsFocused } from "@react-navigation/native";
 
 const AssetsScreen = () => {
+  const isFocused = useIsFocused();
   const [assetGroups, setAssetGroups] = useState<FiananceAssetGroup[]>([]);
   const [assets, setAssets] = useState<FiananceAsset[]>([]);
 
@@ -15,7 +17,7 @@ const AssetsScreen = () => {
     db.withTransactionAsync(async () => {
       await getData();
     });
-  }, [db]);
+  }, [db, isFocused]);
 
   const getData = async () => {
     const resultAssetGroup = await db.getAllAsync<FiananceAssetGroup>(

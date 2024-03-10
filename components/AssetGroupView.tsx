@@ -8,6 +8,7 @@ import {
 import Card from "./ui/Card";
 import { useSQLiteContext } from "expo-sqlite/next";
 import { assetTableName, transactionTabelName } from "../model/constants";
+import { useIsFocused } from "@react-navigation/native";
 
 const AssetGroupView = ({
   assetGroup,
@@ -46,6 +47,7 @@ const AssetGroupView = ({
 export default AssetGroupView;
 
 const AssetView = ({ asset }: { asset: FiananceAsset }) => {
+  const isFocused = useIsFocused();
   const [transactionsSummary, setTransactionsSummary] =
     useState<TransactionsByMonth>({
       totalExpenses: 0,
@@ -58,7 +60,7 @@ const AssetView = ({ asset }: { asset: FiananceAsset }) => {
     db.withTransactionAsync(async () => {
       await getData();
     });
-  }, [db]);
+  }, [db, isFocused]);
 
   const getData = async () => {
     const transactionsByMonth = await db.getAllAsync<TransactionsByMonth>(
@@ -71,6 +73,12 @@ const AssetView = ({ asset }: { asset: FiananceAsset }) => {
       [asset.id, asset.id]
     );
     setTransactionsSummary(transactionsByMonth[0]);
+    console.log(
+      "transactionsByMonth, asset name",
+      transactionsByMonth,
+      asset.name
+    );
+    console.log("Done! 🤑");
   };
 
   return (
