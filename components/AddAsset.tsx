@@ -38,6 +38,13 @@ const AddAsset = ({
       id: -1,
     });
     setIsAddingAsset(false);
+    resetAsset();
+  };
+
+  const resetAsset = () => {
+    setName("");
+    setSelectedGrpId(0);
+    setSelectedGrpName("");
   };
 
   return (
@@ -119,7 +126,7 @@ const AddAsset = ({
       </Modal>
       <AddButton
         setIsAddingTransaction={(value) => {
-          //removeTransaction();
+          resetAsset();
           console.log("Removed");
           setIsAddingAsset(value);
         }}
