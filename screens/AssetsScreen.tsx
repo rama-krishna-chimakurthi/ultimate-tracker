@@ -35,7 +35,7 @@ const AssetsScreen = () => {
     <View>
       {assetGroups.map((assetGroup) => {
         return (
-          <View>
+          <View key={assetGroup.id}>
             <AssetGroupView
               assetGroup={assetGroup}
               assets={assets.filter(
@@ -43,7 +43,6 @@ const AssetsScreen = () => {
                   asset.asset_group_id === assetGroup.id && !asset.isDeleted
               )}
             />
-            ;
           </View>
         );
       })}

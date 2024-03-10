@@ -81,6 +81,8 @@ export default function AddTransaction({
       setDate(new Date(transaction.date * 1000));
       setTypeOfTransaction(transaction.type);
       setIsAddingTransaction(true);
+    } else {
+      resetTransaction();
     }
   }, [transaction]);
 
@@ -100,6 +102,25 @@ export default function AddTransaction({
     }
   }
 
+  const resetTransaction = () => {
+    setAmount("");
+    setDescription("");
+    setName("");
+    setTypeOfTransaction("Expense");
+    setCategoryId(1);
+    setCurrentTab(0);
+    setIsAddingTransaction(false);
+    setFromAssetSelected("");
+    setFromAssetId(0);
+    setToAssetSelected("");
+    setToAssetId(0);
+    setDate(new Date());
+    setIsDatePickerVisible(false);
+    setIsTimePickerVisible(false);
+    setCategorySelected("");
+    setCategoryId(0);
+  };
+
   async function handleSave() {
     console.log({
       amount: Number(amount),
@@ -109,6 +130,37 @@ export default function AddTransaction({
       type: typeOfTransaction as "Expense" | "Income",
     });
 
+    switch (typeOfTransaction) {
+      case "Expense":
+        if (fromAssetId < 0 || toAssetId >= 0) {
+          console.log(
+            "invalid Expense. From asset should not be empty. To asset should be empty"
+          );
+          return;
+        }
+        break;
+      case "Income":
+        if (fromAssetId >= 0 || toAssetId < 0) {
+          console.log(
+            "invalid Expense. From asset should be empty. To asset should not be empty"
+          );
+          return;
+        }
+        break;
+      case "Transfer":
+        if (fromAssetId < 0 || toAssetId < 0) {
+          console.log(
+            "invalid Expense. From asset should not be empty. To asset should not be empty"
+          );
+          return;
+        }
+        break;
+    }
+    if (!amount || !date || categoryId > 0) {
+      console.log("Invalid amount or category or date is invalid.");
+      return;
+    }
+
     // @ts-ignore
     await insertTransaction({
       amount: Number(amount),
@@ -117,14 +169,11 @@ export default function AddTransaction({
       date: date.getTime() / 1000,
       type: typeOfTransaction as "Expense" | "Income" | "Transfer",
       name,
+      from_asset: fromAssetId,
+      to_asset: toAssetId,
+      id: transaction?.id ? transaction.id : -1,
     });
-    setAmount("");
-    setDescription("");
-    setName("");
-    setTypeOfTransaction("Expense");
-    setCategoryId(1);
-    setCurrentTab(0);
-    setIsAddingTransaction(false);
+    resetTransaction();
   }
 
   const closeDateTimePicker = () => {
@@ -317,7 +366,13 @@ export default function AddTransaction({
           </Card>
         </View>
       </Modal>
-      <AddButton setIsAddingTransaction={setIsAddingTransaction} />
+      <AddButton
+        setIsAddingTransaction={(value) => {
+          removeTransaction();
+          console.log("Renoved");
+          setIsAddingTransaction(value);
+        }}
+      />
     </View>
   );
 }

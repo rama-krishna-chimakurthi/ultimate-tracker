@@ -94,24 +94,44 @@ const Home = () => {
   };
 
   const insertTransaction = async (transaction: FiananceTransaction) => {
-    db.withTransactionAsync(async () => {
-      await db.runAsync(
-        `
-        INSERT INTO ${transactionTabelName} (category_id, amount, date, description, type, from_asset, to_asset, name) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-      `,
-        [
-          transaction.category_id,
-          transaction.amount,
-          transaction.date,
-          transaction.description,
-          transaction.type,
-          transaction.from_asset ? transaction.from_asset : null,
-          transaction.to_asset ? transaction.to_asset : null,
-          transaction.name,
-        ]
-      );
-      await getData();
-    });
+    if (transaction.id > 0) {
+      db.withTransactionAsync(async () => {
+        await db.runAsync(
+          `UPDATE ${transactionTabelName} SET amount =?, description =?, category_id =?, date =?, type=?, from_asset=?, to_asset=?, name=? WHERE id =?`,
+          [
+            transaction.amount,
+            transaction.description,
+            transaction.category_id,
+            transaction.date,
+            transaction.type,
+            transaction.from_asset ? transaction.from_asset : null,
+            transaction.to_asset ? transaction.to_asset : null,
+            transaction.name,
+            transaction.id,
+          ]
+        );
+        await getData();
+      });
+    } else {
+      db.withTransactionAsync(async () => {
+        await db.runAsync(
+          `
+          INSERT INTO ${transactionTabelName} (category_id, amount, date, description, type, from_asset, to_asset, name) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+        `,
+          [
+            transaction.category_id,
+            transaction.amount,
+            transaction.date,
+            transaction.description,
+            transaction.type,
+            transaction.from_asset ? transaction.from_asset : null,
+            transaction.to_asset ? transaction.to_asset : null,
+            transaction.name,
+          ]
+        );
+        await getData();
+      });
+    }
   };
 
   const deleteTransaction = async (id: number) => {

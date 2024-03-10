@@ -18,17 +18,27 @@ const AssetGroupView = ({
 }) => {
   return (
     <View>
-      <Card>
-        <Text>{assetGroup.name}</Text>
-        <Text>Text</Text>
-      </Card>
-      {assets.map((asset) => {
-        return (
-          <View>
-            <AssetView asset={asset} />
+      {assets.length > 0 && (
+        <Card style={{ margin: 10, padding: 15 }}>
+          <Text>{assetGroup.name}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 5,
+            }}
+          >
+            <View style={{ flex: 1, height: 1, backgroundColor: "black" }} />
           </View>
-        );
-      })}
+          {assets.map((asset) => {
+            return (
+              <View key={asset.id}>
+                <AssetView asset={asset} />
+              </View>
+            );
+          })}
+        </Card>
+      )}
     </View>
   );
 };
@@ -65,7 +75,12 @@ const AssetView = ({ asset }: { asset: FiananceAsset }) => {
 
   return (
     <View>
-      <Card></Card>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Text>{asset.name}</Text>
+        <Text>
+          ₹{transactionsSummary.totalIncome - transactionsSummary.totalExpenses}
+        </Text>
+      </View>
     </View>
   );
 };
