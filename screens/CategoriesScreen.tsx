@@ -4,6 +4,7 @@ import { useSQLiteContext } from "expo-sqlite/next";
 import { SumOfTransactionsByMonth } from "../model/types";
 import { VictoryPie } from "victory-native";
 import Card from "../components/ui/Card";
+import { useIsFocused } from "@react-navigation/native";
 
 const CategoriesScreen = () => {
   const [categorysSummary, setCategoriesSummary] = useState<
@@ -26,12 +27,16 @@ const CategoriesScreen = () => {
   GROUP BY finance_categories.name`;
 
   const db = useSQLiteContext();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
     db.withTransactionAsync(async () => {
-      await getData();
+      getData();
     });
-  }, [db]);
+  }, [isFocused]);
 
   const getData = async () => {
     const now = new Date();

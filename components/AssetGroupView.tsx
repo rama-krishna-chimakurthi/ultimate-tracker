@@ -59,48 +59,20 @@ const AssetView = ({
   deleteAsset(assetId: number, isDeleted: boolean): Promise<void>;
 }) => {
   const isFocused = useIsFocused();
-  const [transactionsSummary, setTransactionsSummary] =
-    useState<TransactionsByMonth>({
-      totalExpenses: 0,
-      totalIncome: 0,
-    });
-
   const db = useSQLiteContext();
 
   useEffect(() => {
-    db.withTransactionAsync(async () => {
-      await getData();
-    });
-  }, [db, isFocused === true]);
+    console.log("asset - ", asset);
+  }, []);
 
-  const getData = async () => {
-    const transactionsByMonth = await db.getAllAsync<TransactionsByMonth>(
-      `
-      SELECT
-        COALESCE(SUM(CASE WHEN from_asset = ? THEN amount ELSE 0 END), 0) AS totalExpenses,
-        COALESCE(SUM(CASE WHEN to_asset = ? THEN amount ELSE 0 END), 0) AS totalIncome
-      FROM ${transactionTabelName};
-    `,
-      [asset.id, asset.id]
-    );
-    setTransactionsSummary(transactionsByMonth[0]);
-    /* console.log(
-      "transactionsByMonth, asset name",
-      transactionsByMonth,
-      asset.name
-    ); */
-    console.log("Done! 🤑");
-  };
-  const total =
-    transactionsSummary.totalIncome - transactionsSummary.totalExpenses;
-  const color = total < 0 ? "red" : "green";
-  const iconName = total < 0 ? "minuscircle" : "pluscircle";
+  const color = asset.amount < 0 ? "red" : "green";
+  const iconName = asset.amount < 0 ? "minuscircle" : "pluscircle";
 
   return (
     <View style={{ paddingVertical: 15 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
         <View style={{ minWidth: "40%", gap: 3 }}>
-          <Amount amount={total} color={color} iconName={iconName} />
+          <Amount amount={asset.amount} color={color} iconName={iconName} />
         </View>
         <View
           style={{

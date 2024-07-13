@@ -17,6 +17,7 @@ export interface FiananceAsset {
     asset_group_id: number;
     isDeleted: boolean;
     settlement_day: number | undefined;
+    amount: number
 }
 
 export interface FiananceTransaction {
@@ -32,6 +33,7 @@ export interface FiananceTransaction {
 }
 
 export interface TransactionsByMonth {
+    id?: number;
     totalExpenses: number;
     totalIncome: number;
 }

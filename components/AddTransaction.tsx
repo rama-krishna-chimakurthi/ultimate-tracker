@@ -206,7 +206,7 @@ export default function AddTransaction({
             backgroundColor: "rgba(0,0,0,0.7)",
           }}
         >
-          <Card style={{ height: 700 }}>
+          <Card style={{ height: 500 }}>
             <ScrollView showsVerticalScrollIndicator={false}>
               <TextInput
                 placeholder="₹Amount"

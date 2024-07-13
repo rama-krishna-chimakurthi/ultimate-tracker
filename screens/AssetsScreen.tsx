@@ -1,8 +1,16 @@
 import { View, Text } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite/next";
-import { assetGroupTableName, assetTableName } from "../model/constants";
-import { FiananceAsset, FiananceAssetGroup } from "../model/types";
+import {
+  assetGroupTableName,
+  assetTableName,
+  transactionTabelName,
+} from "../model/constants";
+import {
+  FiananceAsset,
+  FiananceAssetGroup,
+  TransactionsByMonth,
+} from "../model/types";
 import AssetGroupView from "../components/AssetGroupView";
 import { useIsFocused } from "@react-navigation/native";
 import AddAsset from "../components/AddAsset";
@@ -15,10 +23,17 @@ const AssetsScreen = () => {
   const db = useSQLiteContext();
 
   useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
+    setAssetGroups([]);
+    setAssets([]);
     db.withTransactionAsync(async () => {
-      await getData();
+      getData().then(() => {
+        console.log("Data retrieved!");
+      });
     });
-  }, [db, isFocused == true]);
+  }, [isFocused]);
 
   const getData = async () => {
     const resultAssetGroup = await db.getAllAsync<FiananceAssetGroup>(
@@ -29,11 +44,44 @@ const AssetsScreen = () => {
     );
 
     setAssetGroups(resultAssetGroup);
+
+    const trans: TransactionsByMonth[] = await getAssetAmount();
+    resultAssets.forEach((asset) => {
+      const asset_tran: TransactionsByMonth[] = trans.filter(
+        (tran) => asset.id === tran.id
+      );
+      asset.amount =
+        asset_tran.length > 0
+          ? asset_tran[0].totalIncome - asset_tran[0].totalExpenses
+          : 0;
+    });
+
     setAssets(resultAssets);
 
     //console.log(resultAssets);
 
     console.log("Done! 🔥");
+  };
+
+  /* const storeAmount = async (assets: FiananceAsset[]) => {
+    assets.forEach(async (asset) => {
+      asset.amount = await getAssetAmount(asset);
+    });
+  }; */
+
+  const getAssetAmount = async () => {
+    const transactionsByMonth = await db.getAllAsync<TransactionsByMonth>(
+      `
+      SELECT ${assetTableName}.id, COALESCE(SUM(CASE WHEN from_asset = ${assetTableName}.id THEN amount ELSE 0 END), 0) AS totalExpenses,
+              COALESCE(SUM(CASE WHEN to_asset = ${assetTableName}.id THEN amount ELSE 0 END), 0) AS totalIncome
+      FROM ${assetTableName}
+      join ${transactionTabelName}
+      on ${transactionTabelName}.from_asset = ${assetTableName}.id or ${transactionTabelName}.to_asset = ${assetTableName}.id
+      group by ${assetTableName}.id
+      `
+    );
+    console.log("Done! 🤑");
+    return transactionsByMonth;
   };
 
   const insertAsset = async (asset: FiananceAsset) => {
@@ -56,7 +104,7 @@ const AssetsScreen = () => {
         await getData();
       }); */
     } else {
-      db.withTransactionAsync(async () => {
+      await db.withTransactionAsync(async () => {
         await db.runAsync(
           `
           INSERT INTO ${assetTableName} (name, asset_group_id, settlement_day) VALUES (?, ?, ?);
@@ -87,21 +135,23 @@ const AssetsScreen = () => {
       <View style={{ padding: 10 }}>
         <AddAsset assetGroups={assetGroups} insertAsset={insertAsset} />
       </View>
-      {assetGroups.map((assetGroup) => {
-        return (
-          <View key={assetGroup.id}>
-            <AssetGroupView
-              assetGroup={assetGroup}
-              assets={assets.filter(
-                (asset) => asset.asset_group_id === assetGroup.id
-              )}
-              deleteAsset={(assetId: number, isDeleted: boolean) =>
-                toggleAssetDeletion(assetId, isDeleted)
-              }
-            />
-          </View>
-        );
-      })}
+      {assetGroups &&
+        assets &&
+        assetGroups.map((assetGroup) => {
+          return (
+            <View key={assetGroup.id}>
+              <AssetGroupView
+                assetGroup={assetGroup}
+                assets={assets.filter(
+                  (asset) => asset.asset_group_id === assetGroup.id
+                )}
+                deleteAsset={(assetId: number, isDeleted: boolean) =>
+                  toggleAssetDeletion(assetId, isDeleted)
+                }
+              />
+            </View>
+          );
+        })}
     </View>
   );
 };

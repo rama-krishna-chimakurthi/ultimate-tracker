@@ -40,10 +40,13 @@ const Home = () => {
   const isFocused = useIsFocused();
 
   useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
     db.withTransactionAsync(async () => {
-      await getData();
+      getData();
     });
-  }, [db, isFocused == true]);
+  }, [isFocused]);
 
   const editTransactionClicked = (transaction: FiananceTransaction) => {
     //console.log("editTransactionClicked", transaction);
@@ -70,6 +73,8 @@ const Home = () => {
     setTransactions(resultTransactions);
     setAssetGroups(resultAssetGroup);
     setAssets(resultAssets);
+
+    //console.log("resultTransactions - ", resultTransactions);
 
     const now = new Date();
     // Set to the first day of the current month
