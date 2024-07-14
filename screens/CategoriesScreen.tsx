@@ -5,6 +5,7 @@ import { SumOfTransactionsByMonth } from "../model/types";
 import { VictoryPie } from "victory-native";
 import Card from "../components/ui/Card";
 import { useIsFocused } from "@react-navigation/native";
+import { dataSource } from "../services/DataService";
 
 const CategoriesScreen = () => {
   const [categorysSummary, setCategoriesSummary] = useState<
@@ -23,19 +24,18 @@ const CategoriesScreen = () => {
   FROM finance_transactions
   JOIN finance_categories
   ON finance_categories.id = finance_transactions.category_id
-  WHERE finance_transactions.date >= ? AND finance_transactions.date <= ?
+  WHERE finance_transactions.transaction_date >= ? AND finance_transactions.transaction_date <= ?
   GROUP BY finance_categories.name`;
 
-  const db = useSQLiteContext();
   const isFocused = useIsFocused();
 
   useEffect(() => {
     if (!isFocused) {
       return;
     }
-    db.withTransactionAsync(async () => {
-      getData();
-    });
+    //db.withTransactionAsync(async () => {
+    getData();
+    //});
   }, [isFocused]);
 
   const getData = async () => {
@@ -50,7 +50,9 @@ const CategoriesScreen = () => {
     const startOfMonthTimestamp = Math.floor(startOfMonth.getTime() / 1000);
     const endOfMonthTimestamp = Math.floor(endOfMonth.getTime() / 1000);
 
-    const result = await db.getAllAsync<SumOfTransactionsByMonth>(query, [
+    const queryRunner = dataSource.createQueryRunner();
+
+    const result: SumOfTransactionsByMonth[] = await queryRunner.query(query, [
       startOfMonthTimestamp,
       endOfMonthTimestamp,
     ]);
