@@ -3,24 +3,16 @@ import { StyleSheet, Text, View } from "react-native";
 import { AutoSizeText, ResizeTextMode } from "react-native-auto-size-text";
 import { categoryColors, categoryEmojies } from "../model/constants";
 import Card from "./ui/Card";
-import {
-  FiananceAsset,
-  FiananceCategory,
-  FiananceTransaction,
-} from "../model/types";
+import { FinanceTransaction } from "../entities/FinanceTransaction";
+import { FinanceAsset } from "../entities/FinanceAsset";
+import { FinanceCategory } from "../entities/FinanceCategory";
 
 interface TransactionListItemProps {
-  transaction: FiananceTransaction;
-  categoryInfo: FiananceCategory | undefined;
-  toAsset: FiananceAsset | undefined;
-  fromAsset: FiananceAsset | undefined;
+  transaction: FinanceTransaction;
 }
 
 export default function TransactionListItem({
   transaction,
-  categoryInfo,
-  toAsset,
-  fromAsset,
 }: TransactionListItemProps) {
   const iconName =
     transaction.type === "Expense"
@@ -29,8 +21,8 @@ export default function TransactionListItem({
       ? "pluscircle"
       : undefined;
   const color = transaction.type === "Expense" ? "red" : "green";
-  const categoryColor = categoryColors[categoryInfo?.name ?? "Default"];
-  const emoji = categoryEmojies[categoryInfo?.name ?? "Default"];
+  const categoryColor = categoryColors[transaction.category.name ?? "Default"];
+  const emoji = categoryEmojies[transaction.category?.name ?? "Default"];
   return (
     <Card>
       <View style={styles.row}>
@@ -42,16 +34,16 @@ export default function TransactionListItem({
           />
           <CategoryItem
             categoryColor={categoryColor}
-            categoryInfo={categoryInfo}
+            categoryInfo={transaction.category}
             emoji={emoji}
           />
         </View>
         <TransactionInfo
-          date={transaction.date}
+          date={transaction.transactionDate}
           description={transaction.description}
           name={transaction.name}
-          toAsset={toAsset}
-          fromAsset={fromAsset}
+          toAsset={transaction.toAsset}
+          fromAsset={transaction.fromAsset}
         />
       </View>
     </Card>
@@ -66,18 +58,16 @@ function TransactionInfo({
   toAsset,
 }: {
   name: string;
-  date: number;
+  date: Date;
   description: string;
-  fromAsset: FiananceAsset | undefined;
-  toAsset: FiananceAsset | undefined;
+  fromAsset: FinanceAsset | undefined;
+  toAsset: FinanceAsset | undefined;
 }) {
   return (
     <View style={{ flexGrow: 1, gap: 6, flexShrink: 1 }}>
       <Text style={{ fontSize: 16, fontWeight: "bold" }}>{name}</Text>
       <Text>{description}</Text>
-      <Text style={{ fontSize: 12, color: "gray" }}>
-        {new Date(date * 1000).toDateString()}
-      </Text>
+      <Text style={{ fontSize: 12, color: "gray" }}>{date.toDateString()}</Text>
       <Text>
         {(fromAsset ? fromAsset.name : "") +
           (fromAsset && toAsset ? " -> " : "") +
@@ -93,7 +83,7 @@ function CategoryItem({
   emoji,
 }: {
   categoryColor: string;
-  categoryInfo: FiananceCategory | undefined;
+  categoryInfo: FinanceCategory | undefined;
   emoji: string;
 }) {
   return (

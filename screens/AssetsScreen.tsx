@@ -1,26 +1,24 @@
 import { View, Text } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useSQLiteContext } from "expo-sqlite/next";
+
 import {
   assetGroupTableName,
   assetTableName,
   transactionTabelName,
 } from "../model/constants";
-import {
-  FiananceAsset,
-  FiananceAssetGroup,
-  TransactionsByMonth,
-} from "../model/types";
+
 import AssetGroupView from "../components/AssetGroupView";
 import { useIsFocused } from "@react-navigation/native";
 import AddAsset from "../components/AddAsset";
+import { FinanceAssetGroup } from "../entities/FinanceAssetGroup";
+import { FinanceAsset } from "../entities/FinanceAsset";
+import { dataSource } from "../services/DataService";
+import { TransactionsByMonth } from "../model/types";
 
 const AssetsScreen = () => {
   const isFocused = useIsFocused();
-  const [assetGroups, setAssetGroups] = useState<FiananceAssetGroup[]>([]);
-  const [assets, setAssets] = useState<FiananceAsset[]>([]);
-
-  const db = useSQLiteContext();
+  const [assetGroups, setAssetGroups] = useState<FinanceAssetGroup[]>([]);
+  const [assets, setAssets] = useState<FinanceAsset[]>([]);
 
   useEffect(() => {
     if (!isFocused) {
@@ -28,22 +26,15 @@ const AssetsScreen = () => {
     }
     setAssetGroups([]);
     setAssets([]);
-    db.withTransactionAsync(async () => {
-      getData().then(() => {
-        console.log("Data retrieved!");
-      });
-    });
+    getData();
   }, [isFocused]);
 
   const getData = async () => {
-    const resultAssetGroup = await db.getAllAsync<FiananceAssetGroup>(
-      `SELECT * FROM ${assetGroupTableName}`
-    );
-    const resultAssets = await db.getAllAsync<FiananceAsset>(
-      `SELECT * FROM ${assetTableName}`
-    );
-
+    const resultAssetGroup = await dataSource
+      .getRepository(FinanceAssetGroup)
+      .find();
     setAssetGroups(resultAssetGroup);
+    const resultAssets = await dataSource.getRepository(FinanceAsset).find();
 
     const trans: TransactionsByMonth[] = await getAssetAmount();
     resultAssets.forEach((asset) => {
@@ -63,14 +54,15 @@ const AssetsScreen = () => {
     console.log("Done! 🔥");
   };
 
-  /* const storeAmount = async (assets: FiananceAsset[]) => {
+  /* const storeAmount = async (assets: FinanceAsset[]) => {
     assets.forEach(async (asset) => {
       asset.amount = await getAssetAmount(asset);
     });
   }; */
 
   const getAssetAmount = async () => {
-    const transactionsByMonth = await db.getAllAsync<TransactionsByMonth>(
+    const queryRunner = dataSource.createQueryRunner();
+    const transactionsByMonth: TransactionsByMonth[] = await queryRunner.query(
       `
       SELECT ${assetTableName}.id, COALESCE(SUM(CASE WHEN from_asset = ${assetTableName}.id THEN amount ELSE 0 END), 0) AS totalExpenses,
               COALESCE(SUM(CASE WHEN to_asset = ${assetTableName}.id THEN amount ELSE 0 END), 0) AS totalIncome
@@ -84,7 +76,7 @@ const AssetsScreen = () => {
     return transactionsByMonth;
   };
 
-  const insertAsset = async (asset: FiananceAsset) => {
+  const insertAsset = async (asset: FinanceAsset) => {
     if (asset.id > 0) {
       /* db.withTransactionAsync(async () => {
         await db.runAsync(
@@ -104,7 +96,8 @@ const AssetsScreen = () => {
         await getData();
       }); */
     } else {
-      await db.withTransactionAsync(async () => {
+      await dataSource.getRepository(FinanceAsset).save(asset);
+      /* await db.withTransactionAsync(async () => {
         await db.runAsync(
           `
           INSERT INTO ${assetTableName} (name, asset_group_id, settlement_day) VALUES (?, ?, ?);
@@ -114,20 +107,23 @@ const AssetsScreen = () => {
             asset.asset_group_id,
             asset.settlement_day ? asset.settlement_day : null,
           ]
-        );
-        await getData();
-      });
+        ); */
+      await getData();
     }
   };
 
   const toggleAssetDeletion = async (assetId: number, isDeleted: boolean) => {
-    db.withTransactionAsync(async () => {
+    await dataSource.getRepository(FinanceAsset).update(assetId, {
+      isDeleted,
+    });
+    await getData();
+
+    /* db.withTransactionAsync(async () => {
       await db.runAsync(
         `UPDATE ${assetTableName} set isDeleted = ? WHERE id =?`,
         [isDeleted ? 1 : 0, assetId]
       );
-      await getData();
-    });
+    }); */
   };
 
   return (
@@ -143,7 +139,7 @@ const AssetsScreen = () => {
               <AssetGroupView
                 assetGroup={assetGroup}
                 assets={assets.filter(
-                  (asset) => asset.asset_group_id === assetGroup.id
+                  (asset) => asset.assetGroup.id === assetGroup.id
                 )}
                 deleteAsset={(assetId: number, isDeleted: boolean) =>
                   toggleAssetDeletion(assetId, isDeleted)

@@ -10,35 +10,31 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import Card from "./ui/Card";
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
-import { useSQLiteContext } from "expo-sqlite/next";
-import {
-  FiananceAsset,
-  FiananceCategory,
-  FiananceTransaction,
-} from "../model/types";
+
 import { categoryTableName } from "../model/constants";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { FinanceTransaction } from "../entities/FinanceTransaction";
+import { FinanceCategory } from "../entities/FinanceCategory";
+import { dataSource } from "../services/DataService";
+import { FinanceAsset } from "../entities/FinanceAsset";
 
 const transactionTypes = ["Expense", "Income", "Transfer"];
 
 export default function AddTransaction({
-  assets,
   transaction,
-  insertTransaction,
   removeTransaction,
 }: {
-  assets: FiananceAsset[];
-  transaction: FiananceTransaction | undefined;
-  insertTransaction(transaction: FiananceTransaction): Promise<void>;
+  //assets: FinanceAsset[];
+  transaction: FinanceTransaction | undefined;
   removeTransaction(): void;
 }) {
   const [isAddingTransaction, setIsAddingTransaction] =
     useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState<number>(0);
-  const [categories, setCategories] = useState<FiananceCategory[]>([]);
+  const [categories, setCategories] = useState<FinanceCategory[]>([]);
 
   const [amount, setAmount] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -47,6 +43,8 @@ export default function AddTransaction({
   /* Category */
   const [categorySelected, setCategorySelected] = useState<string>("");
   const [categoryId, setCategoryId] = useState<number>(0);
+
+  const [allAssets, setAllAssets] = useState<FinanceAsset[]>([]);
 
   /* From Asset */
   const [fromAssetSelected, setFromAssetSelected] = useState<string>("");
@@ -65,7 +63,17 @@ export default function AddTransaction({
 
   const [typeOfTransaction, setTypeOfTransaction] = useState<string>("Expense");
 
-  const db = useSQLiteContext();
+  useEffect(() => {
+    getAssets();
+    getExpenseType(currentTab);
+    resetTransaction();
+  }, []);
+
+  const getAssets = async () => {
+    const result = await dataSource.getRepository(FinanceAsset).find({});
+    console.log("assets - ", result);
+    setAllAssets(result);
+  };
 
   useEffect(() => {
     getExpenseType(currentTab);
@@ -76,10 +84,13 @@ export default function AddTransaction({
       setAmount(transaction.amount.toString());
       setDescription(transaction.description);
       setName(transaction.name);
-      setCategoryId(transaction.category_id);
-      if (transaction.from_asset) setFromAssetId(transaction.from_asset);
-      if (transaction.to_asset) setToAssetId(transaction.to_asset);
-      setDate(new Date(transaction.date * 1000));
+      setCategoryId(transaction.category.id);
+      setCurrentTab(
+        transactionTypes.findIndex((tr) => tr === transaction.type)
+      );
+      if (transaction.fromAsset) setFromAssetId(transaction.fromAsset.id);
+      if (transaction.toAsset) setToAssetId(transaction.toAsset.id);
+      setDate(transaction.transactionDate);
       setTypeOfTransaction(transaction.type);
       setIsAddingTransaction(true);
     } else {
@@ -88,15 +99,16 @@ export default function AddTransaction({
   }, [transaction]);
 
   async function getExpenseType(currentTab: number) {
-    const type = transactionTypes[currentTab];
+    const type: "Expense" | "Income" =
+      transactionTypes[currentTab] === "Income" ? "Income" : "Expense";
     setTypeOfTransaction(type);
     setCategorySelected("");
 
     if (currentTab < 2) {
-      const result = await db.getAllAsync<FiananceCategory>(
-        `SELECT * FROM ${categoryTableName} WHERE type = ?;`,
-        [type]
-      );
+      const result = await dataSource.getRepository(FinanceCategory).find({
+        where: { type: type },
+      });
+      console.log("category - ", result);
       setCategories(result);
     } else {
       setCategories([]);
@@ -164,9 +176,23 @@ export default function AddTransaction({
       return;
     }
 
-    // @ts-ignore
     await insertTransaction({
       amount: Number(amount),
+      category: categories.find((c) => c.id === categoryId),
+      description,
+      fromAsset: allAssets.find((a) => a.id === fromAssetId),
+      toAsset: allAssets.find((a) => a.id === toAssetId),
+      name,
+      transactionDate: date,
+      type: typeOfTransaction as "Expense" | "Income" | "Transfer",
+      id: transaction?.id ? transaction.id : -1,
+      dateCreated: transaction ? transaction.dateCreated : new Date(),
+      lastUpdated: new Date(),
+    });
+
+    removeTransaction();
+    /* 
+    amount: Number(amount),
       description,
       category_id: categoryId,
       date: date.getTime() / 1000,
@@ -174,10 +200,21 @@ export default function AddTransaction({
       name,
       from_asset: fromAssetId,
       to_asset: toAssetId,
-      id: transaction?.id ? transaction.id : -1,
-    });
+      id: transaction?.id ? transaction.id : -1, */
+
     resetTransaction();
   }
+
+  const insertTransaction = async (transaction: FinanceTransaction) => {
+    console.log("insertTransaction before - ", transaction);
+    const transactionRepo = dataSource.getRepository(FinanceTransaction);
+    if (transaction.id > 0) {
+      await transactionRepo.save(transaction);
+    } else {
+      transaction.id = null;
+      await transactionRepo.save(transaction);
+    }
+  };
 
   const closeDateTimePicker = () => {
     setIsDatePickerVisible(false);
@@ -309,7 +346,7 @@ export default function AddTransaction({
                 typeOfTransaction === "Expense") && (
                 <View>
                   <Text style={{ marginBottom: 6 }}>Select a From Asset</Text>
-                  {assets.map((asset) => (
+                  {allAssets.map((asset) => (
                     <CategoryOrAssetButton
                       key={asset.name}
                       id={asset.id}
@@ -326,7 +363,7 @@ export default function AddTransaction({
                 typeOfTransaction === "Income") && (
                 <View>
                   <Text style={{ marginBottom: 6 }}>Select a To Asset</Text>
-                  {assets.map((asset) => (
+                  {allAssets.map((asset) => (
                     <CategoryOrAssetButton
                       key={asset.name}
                       id={asset.id}
@@ -442,7 +479,10 @@ export const AddButton = ({
 }) => {
   return (
     <TouchableOpacity
-      onPress={() => setIsAddingTransaction(true)}
+      onPress={() => {
+        console.log("clicked");
+        setIsAddingTransaction(true);
+      }}
       activeOpacity={0.6}
       style={{
         height: 40,

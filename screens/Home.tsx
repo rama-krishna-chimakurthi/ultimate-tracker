@@ -1,14 +1,6 @@
 import { View, Text, ScrollView, StyleSheet, TextStyle } from "react-native";
 import React, { useEffect, useState } from "react";
 import {
-  FiananceAsset,
-  FiananceAssetGroup,
-  FiananceCategory,
-  FiananceTransaction,
-  TransactionsByMonth,
-} from "../model/types";
-import { useSQLiteContext } from "expo-sqlite/next";
-import {
   assetGroupTableName,
   assetTableName,
   categoryTableName,
@@ -18,61 +10,93 @@ import TransactionList from "../components/TransactionList";
 import Card from "../components/ui/Card";
 import AddTransaction from "../components/AddTransaction";
 import { useIsFocused } from "@react-navigation/native";
+import { FinanceTransaction } from "../entities/FinanceTransaction";
+import { FinanceTransactionRepo } from "../repo/FinanceTransactionRepo";
+import { dataSource } from "../services/DataService";
+import { TransactionsByMonth } from "../model/types";
+import { Transaction } from "typeorm";
+import { FinanceAsset } from "../entities/FinanceAsset";
+import { FinanceAssetGroup } from "../entities/FinanceAssetGroup";
+import { FinanceCategory } from "../entities/FinanceCategory";
 
 const Home = () => {
-  const [categories, setCategories] = useState<FiananceCategory[]>([]);
-  const [transactions, setTransactions] = useState<FiananceTransaction[]>([]);
+  //const [categories, setCategories] = useState<FinanceCategory[]>([]);
+  const [transactions, setTransactions] = useState<FinanceTransaction[]>([]);
 
-  const [assetGroups, setAssetGroups] = useState<FiananceAssetGroup[]>([]);
-  const [assets, setAssets] = useState<FiananceAsset[]>([]);
+  //const [assetGroups, setAssetGroups] = useState<FinanceAssetGroup[]>([]);
+  //const [assets, setAssets] = useState<FinanceAsset[]>([]);
 
   const [editTransaction, setEditTransaction] = useState<
-    FiananceTransaction | undefined
+    FinanceTransaction | undefined
   >(undefined);
 
-  const [transactionsByMonth, setTransactionsByMonth] =
+  /*   const [transactionsByMonth, setTransactionsByMonth] =
     useState<TransactionsByMonth>({
       totalExpenses: 0,
       totalIncome: 0,
     });
-
-  const db = useSQLiteContext();
+ */
+  const transactionRepo = dataSource.getRepository(FinanceTransaction);
   const isFocused = useIsFocused();
 
   useEffect(() => {
     if (!isFocused) {
       return;
     }
-    db.withTransactionAsync(async () => {
-      getData();
-    });
+
+    /* const connect = async () => {
+      await dataSource
+        .initialize()
+        .then(() => {
+          console.log("Database connected successfully");
+          })
+        .catch((e) => console.error(e));
+        };
+        connect(); 
+    */
+
+    //db.withTransactionAsync(async () => {
+    getData();
+    //});
   }, [isFocused]);
 
-  const editTransactionClicked = (transaction: FiananceTransaction) => {
+  const editTransactionClicked = (transaction: FinanceTransaction) => {
     //console.log("editTransactionClicked", transaction);
     setEditTransaction(transaction);
   };
 
   const getData = async () => {
-    const resultCategory = await db.getAllAsync<FiananceCategory>(
+    /* const resultCategory = await db.getAllAsync<FinanceCategory>(
       `SELECT * FROM ${categoryTableName}`
     );
-    const resultTransactions = await db.getAllAsync<FiananceTransaction>(
+    const resultTransactions = await db.getAllAsync<FinanceTransaction>(
       `SELECT * FROM ${transactionTabelName} ORDER BY date DESC`
     );
-    const resultAssetGroup = await db.getAllAsync<FiananceAssetGroup>(
+    const resultAssetGroup = await db.getAllAsync<FinanceAssetGroup>(
       `SELECT * FROM ${assetGroupTableName} WHERE isDeleted = ?`,
       [0]
     );
-    const resultAssets = await db.getAllAsync<FiananceAsset>(
+    const resultAssets = await db.getAllAsync<FinanceAsset>(
       `SELECT * FROM ${assetTableName} WHERE isDeleted = ?`,
       [0]
     );
 
-    setCategories(resultCategory);
+    setCategories(resultCategory); */
+
+    //const assets = await dataSource.getRepository(FinanceCategory).find();
+    //console.log("assets - ", assets);
+
+    const resultTransactions = await transactionRepo.find({
+      order: {
+        transactionDate: "DESC",
+      },
+    });
+
+    console.log("resultTransactions - ", resultTransactions);
+
     setTransactions(resultTransactions);
-    setAssetGroups(resultAssetGroup);
-    setAssets(resultAssets);
+    /* setAssetGroups(resultAssetGroup);
+    setAssets(resultAssets); */
 
     //console.log("resultTransactions - ", resultTransactions);
 
@@ -87,7 +111,7 @@ const Home = () => {
     const startOfMonthTimestamp = Math.floor(startOfMonth.getTime() / 1000);
     const endOfMonthTimestamp = Math.floor(endOfMonth.getTime() / 1000);
 
-    const transactionsByMonth = await db.getAllAsync<TransactionsByMonth>(
+    /* const transactionsByMonth = await db.getAllAsync<TransactionsByMonth>(
       `
       SELECT
         COALESCE(SUM(CASE WHEN type = 'Expense' THEN amount ELSE 0 END), 0) AS totalExpenses,
@@ -97,81 +121,38 @@ const Home = () => {
     `,
       [startOfMonthTimestamp, endOfMonthTimestamp]
     );
-    setTransactionsByMonth(transactionsByMonth[0]);
+    setTransactionsByMonth(transactionsByMonth[0]); */
 
     console.log("Done! 🔥");
   };
 
-  const insertTransaction = async (transaction: FiananceTransaction) => {
-    if (transaction.id > 0) {
-      db.withTransactionAsync(async () => {
-        await db.runAsync(
-          `UPDATE ${transactionTabelName} SET amount =?, description =?, category_id =?, date =?, type=?, from_asset=?, to_asset=?, name=? WHERE id =?`,
-          [
-            transaction.amount,
-            transaction.description,
-            transaction.category_id,
-            transaction.date,
-            transaction.type,
-            transaction.from_asset ? transaction.from_asset : null,
-            transaction.to_asset ? transaction.to_asset : null,
-            transaction.name,
-            transaction.id,
-          ]
-        );
-        await getData();
-      });
-    } else {
-      db.withTransactionAsync(async () => {
-        await db.runAsync(
-          `
-          INSERT INTO ${transactionTabelName} (category_id, amount, date, description, type, from_asset, to_asset, name) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-        `,
-          [
-            transaction.category_id,
-            transaction.amount,
-            transaction.date,
-            transaction.description,
-            transaction.type,
-            transaction.from_asset ? transaction.from_asset : null,
-            transaction.to_asset ? transaction.to_asset : null,
-            transaction.name,
-          ]
-        );
-        await getData();
-      });
-    }
-  };
-
   const deleteTransaction = async (id: number) => {
-    //console.log("Delete Transaction 🌋 - id = " + id);
-    await db.withTransactionAsync(async () => {
+    console.log("Delete Transaction 🌋 - id = " + id);
+    await transactionRepo.delete(id);
+    await getData();
+    /* await db.withTransactionAsync(async () => {
       await db.runAsync(`DELETE FROM ${transactionTabelName} WHERE id = ?;`, [
         id,
       ]);
       await getData();
-    });
+    }); */
   };
 
   return (
     <View>
       <ScrollView contentContainerStyle={{ padding: 15, paddingVertical: 30 }}>
         <AddTransaction
-          insertTransaction={insertTransaction}
-          assets={assets}
           transaction={editTransaction}
           removeTransaction={() => {
             setEditTransaction(undefined);
+            getData();
           }}
         />
-        <TransactionSummary
+        {/* <TransactionSummary
           totalExpenses={transactionsByMonth.totalExpenses}
           totalIncome={transactionsByMonth.totalIncome}
-        />
+        /> */}
         <TransactionList
-          assetGroups={assetGroups}
-          assets={assets}
-          categories={categories}
           transactions={transactions}
           deleteTransaction={deleteTransaction}
           editTransaction={editTransactionClicked}

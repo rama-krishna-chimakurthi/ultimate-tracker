@@ -1,24 +1,22 @@
 import { View, Text, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
-import {
-  FiananceAsset,
-  FiananceAssetGroup,
-  TransactionsByMonth,
-} from "../model/types";
+import { TransactionsByMonth } from "../model/types";
 import Card from "./ui/Card";
-import { useSQLiteContext } from "expo-sqlite/next";
+
 import { assetTableName, transactionTabelName } from "../model/constants";
 import { useIsFocused } from "@react-navigation/native";
 import { Amount } from "./TransactionListItem";
 import { Ionicons } from "@expo/vector-icons";
+import { FinanceAssetGroup } from "../entities/FinanceAssetGroup";
+import { FinanceAsset } from "../entities/FinanceAsset";
 
 const AssetGroupView = ({
   assetGroup,
   assets,
   deleteAsset,
 }: {
-  assetGroup: FiananceAssetGroup;
-  assets: FiananceAsset[];
+  assetGroup: FinanceAssetGroup;
+  assets: FinanceAsset[];
   deleteAsset: (assetId: number, isDeleted: boolean) => Promise<void>;
 }) => {
   return (
@@ -55,11 +53,10 @@ const AssetView = ({
   asset,
   deleteAsset,
 }: {
-  asset: FiananceAsset;
+  asset: FinanceAsset;
   deleteAsset(assetId: number, isDeleted: boolean): Promise<void>;
 }) => {
   const isFocused = useIsFocused();
-  const db = useSQLiteContext();
 
   useEffect(() => {
     console.log("asset - ", asset);

@@ -8,16 +8,19 @@ export const transactionTabelName = "finance_transactions";
 
 
 export const categoryColors: { [key: string]: string } = {
-    Groceries: "#FFD700", // Gold
+    "Groceries and Household": "#FFD700", // Gold
     Rent: "#FF6347", // Tomato
     Salary: "#32CD32", // LimeGreen
     Freelancing: "#6495ED", // CornflowerBlue
-    Utilities: "#00CED1", // DarkTurquoise
-    Electronics: "#8A2BE2", // BlueViolet
-    "Dining Out": "#FFA07A", // LightSalmon
-    "Breakfast Supplies": "#FFDEAD", // NavajoWhite
+    "Loans": "#457126",
+    "Office Travel": "#784932",
+    "Bills & Utilities": "#00CED1", // DarkTurquoise
+    "Entertainment & Social Life": "#8A2BE2", // BlueViolet
+    "Food": "#FFA07A", // LightSalmon
+    "Health and Wellness": "#132434",
+    "Office Food": "#FFDEAD", // NavajoWhite
     "Household Items": "#F0E68C", // Khaki
-    "Christmas Gifts": "#FF69B4", // HotPink
+    "Parents": "#FF69B4", // HotPink
     "New Year Party Supplies": "#DB7093", // PaleVioletRed
     "Thanksgiving Groceries": "#CD853F", // Peru
     Bonus: "#6B8E23", // OliveDrab
@@ -25,22 +28,25 @@ export const categoryColors: { [key: string]: string } = {
     "Part-Time Job": "#DAA520", // GoldenRod
     "Online Sales": "#20B2AA", // LightSeaGreen
     "Freelance Writing": "#778899", // LightSlateGray
-    "End of Year Bonus": "#5F9EA0", // CadetBlue
+    "Shopping": "#5F9EA0", // CadetBlue
     "Thanksgiving Freelance": "#BDB76B", // DarkKhaki
     Default: "#D3D3D3", // LightGray
 };
 
 export const categoryEmojies: { [key: string]: string } = {
-    Groceries: "🛒",
+    "Groceries and Household": "🛒",
     Rent: "🏠",
     Salary: "💰",
     Freelancing: "👨🏻‍💻",
-    Utilities: "💡",
-    Electronics: "🖥️",
-    "Dining Out": "🍽️",
-    "Breakfast Supplies": "🥐",
+    "Office Travel": "🚌",
+    "Loans": "🏦",
+    "Bills & Utilities": "💡",
+    "Entertainment & Social Life": "🖥️",
+    "Food": "🍽️",
+    "Health and Wellness": "🏥",
+    "Office Food": "🥐",
     "Household Items": "🏡",
-    "Christmas Gifts": "🎁",
+    "Parents": "🎁",
     "New Year Party Supplies": "🎉",
     "Thanksgiving Groceries": "🦃",
     Bonus: "🎊",
@@ -48,7 +54,7 @@ export const categoryEmojies: { [key: string]: string } = {
     "Part-Time Job": "⌚",
     "Online Sales": "🛒",
     "Freelance Writing": "✍️",
-    "End of Year Bonus": "🍾",
+    "Shopping": "🍾",
     "Thanksgiving Freelance": "🍂",
     Default: "🫰🏼",
 };

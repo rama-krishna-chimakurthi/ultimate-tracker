@@ -1,40 +1,24 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
-import {
-  FiananceAsset,
-  FiananceAssetGroup,
-  FiananceCategory,
-  FiananceTransaction,
-} from "../model/types";
+
 import TransactionListItem from "./TransactionListItem";
+import { FinanceTransaction } from "../entities/FinanceTransaction";
 
 const TransactionList = ({
   transactions,
-  categories,
-  assetGroups,
-  assets,
   deleteTransaction,
   editTransaction,
 }: {
-  transactions: FiananceTransaction[];
-  categories: FiananceCategory[];
-  assetGroups: FiananceAssetGroup[];
-  assets: FiananceAsset[];
+  transactions: FinanceTransaction[];
   deleteTransaction: (transactionId: number) => Promise<void>;
-  editTransaction: (transaction: FiananceTransaction) => void;
+  editTransaction: (transaction: FinanceTransaction) => void;
 }) => {
   return (
     <View style={{ gap: 15 }}>
       {transactions.map((transaction) => {
-        const categoryForCurrentItem = categories.find(
-          (category) => category.id === transaction.category_id
-        );
-        const fromAssetForCurrentItem = assets.find(
-          (asset) => asset.id === transaction.from_asset
-        );
-        const toAssetForCurrentItem = assets.find(
-          (asset) => asset.id === transaction.to_asset
-        );
+        const categoryForCurrentItem = transaction.category;
+        const fromAssetForCurrentItem = transaction.fromAsset;
+        const toAssetForCurrentItem = transaction.toAsset;
         return (
           <TouchableOpacity
             key={transaction.id}
@@ -42,12 +26,7 @@ const TransactionList = ({
             onLongPress={() => deleteTransaction(transaction.id!)}
             onPress={() => editTransaction(transaction)}
           >
-            <TransactionListItem
-              transaction={transaction}
-              categoryInfo={categoryForCurrentItem}
-              fromAsset={fromAssetForCurrentItem}
-              toAsset={toAssetForCurrentItem}
-            />
+            <TransactionListItem transaction={transaction} />
           </TouchableOpacity>
         );
       })}

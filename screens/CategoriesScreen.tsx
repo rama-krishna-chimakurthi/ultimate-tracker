@@ -1,6 +1,6 @@
 import { View, Text, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useSQLiteContext } from "expo-sqlite/next";
+
 import { SumOfTransactionsByMonth } from "../model/types";
 import { VictoryPie } from "victory-native";
 import Card from "../components/ui/Card";
@@ -16,7 +16,7 @@ const CategoriesScreen = () => {
   const [dataIncomes, setDataIncome] = useState<{ x: string; y: number }[]>([]);
 
   const query = `
-  SELECT 
+  SELECT
     finance_categories.name, finance_categories.id,
       COALESCE(SUM(CASE WHEN finance_transactions.type = 'Expense' THEN amount ELSE 0 END), 0) AS totalExpenses,
       COALESCE(SUM(CASE WHEN finance_transactions.type = 'Income' THEN amount ELSE 0 END), 0) AS totalIncome

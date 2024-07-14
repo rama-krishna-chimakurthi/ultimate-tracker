@@ -10,14 +10,15 @@ import {
 import React, { useState } from "react";
 import { AddButton, CategoryOrAssetButton } from "./AddTransaction";
 import Card from "./ui/Card";
-import { FiananceAsset, FiananceAssetGroup } from "../model/types";
+import { FinanceAssetGroup } from "../entities/FinanceAssetGroup";
+import { FinanceAsset } from "../entities/FinanceAsset";
 
 const AddAsset = ({
   assetGroups,
   insertAsset,
 }: {
-  assetGroups: FiananceAssetGroup[];
-  insertAsset(asset: FiananceAsset): Promise<void>;
+  assetGroups: FinanceAssetGroup[];
+  insertAsset(asset: FinanceAsset): Promise<void>;
 }) => {
   const [isAddingAsset, setIsAddingAsset] = useState<boolean>(false);
   const [name, setName] = useState<string>("");
@@ -32,10 +33,11 @@ const AddAsset = ({
 
     insertAsset({
       name,
-      asset_group_id: selectedGrpId,
+      assetGroup: assetGroups.find((grp) => grp.id === selectedGrpId),
       isDeleted: false,
-      settlement_day: undefined,
+      settlementDay: undefined,
       id: -1,
+      paymentDay: undefined,
     });
     setIsAddingAsset(false);
     resetAsset();
