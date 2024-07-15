@@ -41,7 +41,7 @@ const BottomTabsNavigator = () => {
       }}
     >
       <bottomTabs.Screen
-        name="main"
+        name="Finance"
         component={TopTabsNavigator}
         options={{
           headerTitle: "Finance Tracker",
@@ -105,17 +105,17 @@ export default function App() {
           </View>
         }
       >
-        <Stack.Navigator>
+        {/* <Stack.Navigator>
           <Stack.Screen
             name="main"
             component={BottomTabsNavigator}
             options={{
-              /* headerTitle: "Ultimate Tracker",
-              headerLargeTitle: true, */
               headerShown: false,
             }}
           />
-        </Stack.Navigator>
+        </Stack.Navigator> */}
+
+        <BottomTabsNavigator />
       </Suspense>
     </NavigationContainer>
   );

@@ -14,6 +14,7 @@ export const categoryColors: { [key: string]: string } = {
     Freelancing: "#6495ED", // CornflowerBlue
     "Loans": "#457126",
     "Office Travel": "#784932",
+    "Travel": '#454555',
     "Bills & Utilities": "#00CED1", // DarkTurquoise
     "Entertainment & Social Life": "#8A2BE2", // BlueViolet
     "Food": "#FFA07A", // LightSalmon
@@ -39,6 +40,7 @@ export const categoryEmojies: { [key: string]: string } = {
     Salary: "💰",
     Freelancing: "👨🏻‍💻",
     "Office Travel": "🚌",
+    "Travel": "🚆",
     "Loans": "🏦",
     "Bills & Utilities": "💡",
     "Entertainment & Social Life": "🖥️",

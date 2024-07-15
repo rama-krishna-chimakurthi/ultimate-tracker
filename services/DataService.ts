@@ -4,26 +4,10 @@ import { FinanceAssetGroup } from "../entities/FinanceAssetGroup";
 import { FinanceTransaction } from "../entities/FinanceTransaction";
 import { CreateMasterData1720946451792 } from "../db/migrations/1720946451792-CreateMasterData";
 import { FinanceCategory } from "../entities/FinanceCategory";
-import { PasswordRepo } from "../repo/PasswordRepo";
-import { FinanceAssetRepo } from "../repo/FinanceAssetRepo";
-import { FinanceAssetGroupRepo } from "../repo/FinanceAssetGroupRepo";
-import { FinanceTransactionRepo } from "../repo/FinanceTransactionRepo";
-import { FinanceCategoryRepo } from "../repo/FinanceCategoryRepo";
 import * as SQLite from 'expo-sqlite/legacy';
 
-//import * as FileSystem from "expo-file-system";
-
-
-import React, {
-    createContext,
-    ReactNode,
-    useCallback,
-    useContext,
-    useEffect,
-    useState,
-} from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { Connection, createConnection, DataSource } from 'typeorm';
+import { DataSource } from 'typeorm';
+import { NotesAndPasswordCreation1721036886845 } from "../db/migrations/1721036886845-NotesAndPasswordCreation";
 
 
 
@@ -43,6 +27,6 @@ export const dataSource = new DataSource({
     synchronize: false,
     type: 'expo',
     driver: SQLite,
-    migrations: [CreateMasterData1720946451792],
+    migrations: [CreateMasterData1720946451792, NotesAndPasswordCreation1721036886845],
     migrationsRun: true
 });

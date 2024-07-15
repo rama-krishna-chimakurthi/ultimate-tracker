@@ -11,7 +11,6 @@ import Card from "../components/ui/Card";
 import AddTransaction from "../components/AddTransaction";
 import { useIsFocused } from "@react-navigation/native";
 import { FinanceTransaction } from "../entities/FinanceTransaction";
-import { FinanceTransactionRepo } from "../repo/FinanceTransactionRepo";
 import { dataSource } from "../services/DataService";
 import { TransactionsByMonth } from "../model/types";
 import { Between, Transaction } from "typeorm";

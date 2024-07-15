@@ -9,20 +9,37 @@ export class PasswordEntity {
     name: string;
 
     @Column()
-    userNameEmail: string;
+    userName: string;
+
+    @Column()
+    email: string;
+
+    @Column()
+    website: string;
+
+    @Column()
+    category: 'Bank' | 'Social';
 
     @Column()
     password: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({
+        type: 'datetime'
+    })
     dateCreated: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({
+        type: 'datetime'
+    })
     lastUpdated: Date;
 
-    @Column()
+    @Column({
+        type: 'datetime'
+    })
     expiringOn: Date;
 
-    @Column()
-    nexReminder: Date;
+    @Column({
+        type: 'datetime'
+    })
+    nextReminder: Date;
 }

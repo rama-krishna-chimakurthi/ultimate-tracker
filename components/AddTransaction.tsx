@@ -258,7 +258,10 @@ export default function AddTransaction({
         animationType="slide"
         visible={isAddingTransaction}
         transparent={true}
-        onRequestClose={() => setIsAddingTransaction(false)}
+        onRequestClose={() => {
+          removeTransaction();
+          setIsAddingTransaction(false);
+        }}
       >
         <View
           style={{
