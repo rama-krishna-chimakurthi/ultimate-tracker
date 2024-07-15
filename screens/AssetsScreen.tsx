@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 
 import {
@@ -101,26 +101,28 @@ const AssetsScreen = () => {
 
   return (
     <View>
-      <View style={{ padding: 10 }}>
-        <AddAsset assetGroups={assetGroups} insertAsset={insertAsset} />
-      </View>
-      {assetGroups &&
-        assets &&
-        assetGroups.map((assetGroup) => {
-          return (
-            <View key={assetGroup.id}>
-              <AssetGroupView
-                assetGroup={assetGroup}
-                assets={assets.filter(
-                  (asset) => asset.assetGroup.id === assetGroup.id
-                )}
-                deleteAsset={(assetId: number, isDeleted: boolean) =>
-                  toggleAssetDeletion(assetId, isDeleted)
-                }
-              />
-            </View>
-          );
-        })}
+      <ScrollView>
+        <View style={{ padding: 10 }}>
+          <AddAsset assetGroups={assetGroups} insertAsset={insertAsset} />
+        </View>
+        {assetGroups &&
+          assets &&
+          assetGroups.map((assetGroup) => {
+            return (
+              <View key={assetGroup.id}>
+                <AssetGroupView
+                  assetGroup={assetGroup}
+                  assets={assets.filter(
+                    (asset) => asset.assetGroup.id === assetGroup.id
+                  )}
+                  deleteAsset={(assetId: number, isDeleted: boolean) =>
+                    toggleAssetDeletion(assetId, isDeleted)
+                  }
+                />
+              </View>
+            );
+          })}
+      </ScrollView>
     </View>
   );
 };
