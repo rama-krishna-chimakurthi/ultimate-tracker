@@ -4,7 +4,7 @@ import Home from "./screens/Home";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import Passwords from "./screens/Passwords";
+import Passwords from "./screens/PasswordsScreen";
 
 import { MaterialIcons } from "@expo/vector-icons";
 
