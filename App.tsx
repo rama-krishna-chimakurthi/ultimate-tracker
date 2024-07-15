@@ -1,25 +1,23 @@
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { Asset } from "expo-asset";
-import * as FileSystem from "expo-file-system";
 import { Suspense, useEffect, useState } from "react";
-//import { SQLiteProvider } from "expo-sqlite/next";
 import Home from "./screens/Home";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-/* import AssetsScreen from "./screens/AssetsScreen";
-import CategoriesScreen from "./screens/CategoriesScreen"; */
 import Passwords from "./screens/Passwords";
+
+import { MaterialIcons } from "@expo/vector-icons";
 
 import "reflect-metadata";
 import { dataSource } from "./services/DataService";
 import AssetsScreen from "./screens/AssetsScreen";
 import CategoriesScreen from "./screens/CategoriesScreen";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-const dbName = "ultimate-tracker.db";
 const Stack = createNativeStackNavigator();
 
 const topTabs = createMaterialTopTabNavigator();
+const bottomTabs = createBottomTabNavigator();
 
 const TopTabsNavigator = () => {
   return (
@@ -31,24 +29,46 @@ const TopTabsNavigator = () => {
       <topTabs.Screen name="Home" component={Home} />
       <topTabs.Screen name="Assets" component={AssetsScreen} />
       <topTabs.Screen name="Categories" component={CategoriesScreen} />
-      <topTabs.Screen name="Password" component={Passwords} />
     </topTabs.Navigator>
   );
 };
 
-const loadDatabase = async () => {
-  const dbAsset = require(`./assets/${dbName}`);
-  const dbUri = Asset.fromModule(dbAsset).uri;
-  const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
-
-  const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
-  if (!fileInfo.exists) {
-    await FileSystem.makeDirectoryAsync(
-      `${FileSystem.documentDirectory}SQLite`,
-      { intermediates: true }
-    );
-    await FileSystem.downloadAsync(dbUri, dbFilePath);
-  }
+const BottomTabsNavigator = () => {
+  return (
+    <bottomTabs.Navigator
+      screenOptions={{
+        lazy: true,
+      }}
+    >
+      <bottomTabs.Screen
+        name="main"
+        component={TopTabsNavigator}
+        options={{
+          headerTitle: "Finance Tracker",
+          tabBarIcon: ({ focused }) => (
+            <MaterialIcons
+              name="currency-rupee"
+              size={26}
+              color={focused ? "black" : "gray"}
+            />
+          ),
+        }}
+      />
+      <bottomTabs.Screen
+        name="Password"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <MaterialIcons
+              name="password"
+              size={26}
+              color={focused ? "black" : "gray"}
+            />
+          ),
+        }}
+        component={Passwords}
+      />
+    </bottomTabs.Navigator>
+  );
 };
 
 export default function App() {
@@ -66,12 +86,6 @@ export default function App() {
     };
     connect();
   }, []);
-
-  /* useEffect(() => {
-    loadDatabase()
-      .then(() => setDbLoaded(true))
-      .catch((e) => console.error(e));
-  }, []); */
 
   if (!dbLoaded)
     return (
@@ -94,10 +108,11 @@ export default function App() {
         <Stack.Navigator>
           <Stack.Screen
             name="main"
-            component={TopTabsNavigator}
+            component={BottomTabsNavigator}
             options={{
-              headerTitle: "Finance Tracker",
-              headerLargeTitle: true,
+              /* headerTitle: "Ultimate Tracker",
+              headerLargeTitle: true, */
+              headerShown: false,
             }}
           />
         </Stack.Navigator>
