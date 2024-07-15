@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { TransactionsByMonth } from "../model/types";
 import Card from "./ui/Card";
 
-import { assetTableName, transactionTabelName } from "../model/constants";
+import { assetTableName, transactionTableName } from "../model/constants";
 import { useIsFocused } from "@react-navigation/native";
 import { Amount } from "./TransactionListItem";
 import { Ionicons } from "@expo/vector-icons";

@@ -21,7 +21,7 @@ import { FinanceCategory } from "../entities/FinanceCategory";
 import { dataSource } from "../services/DataService";
 import { FinanceAsset } from "../entities/FinanceAsset";
 
-const transactionTypes = ["Expense", "Income", "Transfer"];
+const transactionTypes = ["Expense", "Income", "Transfer", "Difference"];
 
 export default function AddTransaction({
   transaction,
@@ -48,11 +48,11 @@ export default function AddTransaction({
 
   /* From Asset */
   const [fromAssetSelected, setFromAssetSelected] = useState<string>("");
-  const [fromAssetId, setFromAssetId] = useState<number>(0);
+  const [fromAssetId, setFromAssetId] = useState<number | undefined>(undefined);
 
   /* To Asset */
   const [toAssetSelected, setToAssetSelected] = useState<string>("");
-  const [toAssetId, setToAssetId] = useState<number>(0);
+  const [toAssetId, setToAssetId] = useState<number | undefined>(undefined);
 
   /* Date */
   const [date, setDate] = useState<Date>(new Date());
@@ -99,14 +99,13 @@ export default function AddTransaction({
   }, [transaction]);
 
   async function getExpenseType(currentTab: number) {
-    const type: "Expense" | "Income" =
-      transactionTypes[currentTab] === "Income" ? "Income" : "Expense";
+    const type = transactionTypes[currentTab];
     setTypeOfTransaction(type);
     setCategorySelected("");
 
     if (currentTab < 2) {
       const result = await dataSource.getRepository(FinanceCategory).find({
-        where: { type: type },
+        where: { type: type === "Income" ? "Income" : "Expense" },
       });
       console.log("category - ", result);
       setCategories(result);
@@ -162,6 +161,16 @@ export default function AddTransaction({
           return;
         }
         break;
+      case "Difference":
+        if (fromAssetId > 0 || toAssetId <= 0) {
+          console.log("from asset id: " + fromAssetId);
+          console.log("to asset id: " + toAssetId);
+          console.log(
+            "invalid Difference. From asset should be empty. To asset should not be empty"
+          );
+          return;
+        }
+        break;
       case "Transfer":
         if (fromAssetId <= 0 || toAssetId <= 0) {
           console.log(
@@ -171,8 +180,13 @@ export default function AddTransaction({
         }
         break;
     }
-    if (!amount || !date || categoryId <= 0) {
-      console.log("Invalid amount or category or date is invalid.");
+    if (!amount || !date) {
+      console.log("Invalid amount or date is invalid.");
+      return;
+    }
+
+    if (categoryId <= 0 && typeOfTransaction != "Difference") {
+      console.log("Invalid category is invalid.");
       return;
     }
 
@@ -184,7 +198,11 @@ export default function AddTransaction({
       toAsset: allAssets.find((a) => a.id === toAssetId),
       name,
       transactionDate: date,
-      type: typeOfTransaction as "Expense" | "Income" | "Transfer",
+      type: typeOfTransaction as
+        | "Expense"
+        | "Income"
+        | "Transfer"
+        | "Difference",
       id: transaction?.id ? transaction.id : -1,
       dateCreated: transaction ? transaction.dateCreated : new Date(),
       lastUpdated: new Date(),
@@ -321,14 +339,15 @@ export default function AddTransaction({
                 selectedIndex={currentTab}
                 onChange={(event) => {
                   setCurrentTab(+event.nativeEvent.selectedSegmentIndex);
-                  switch (currentTab) {
+                  setToAssetId(transaction?.toAsset?.id);
+                  setFromAssetId(transaction?.fromAsset?.id);
+                  /* switch (currentTab) {
                     case 0:
-                      setToAssetId(0);
                       break;
                     case 1:
-                      setFromAssetId(0);
+                      setFromAssetId(undefined);
                       break;
-                  }
+                  } */
                 }}
               />
               {categories.map((cat) => (
@@ -360,6 +379,7 @@ export default function AddTransaction({
               )}
               {/* To Asset */}
               {(typeOfTransaction === "Transfer" ||
+                typeOfTransaction === "Difference" ||
                 typeOfTransaction === "Income") && (
                 <View>
                   <Text style={{ marginBottom: 6 }}>Select a To Asset</Text>

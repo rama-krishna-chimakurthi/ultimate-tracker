@@ -21,7 +21,7 @@ export default function TransactionListItem({
       ? "pluscircle"
       : undefined;
   const color = transaction.type === "Expense" ? "red" : "green";
-  const categoryColor = categoryColors[transaction.category.name ?? "Default"];
+  const categoryColor = categoryColors[transaction.category?.name ?? "Default"];
   const emoji = categoryEmojies[transaction.category?.name ?? "Default"];
   return (
     <Card>
@@ -34,7 +34,16 @@ export default function TransactionListItem({
           />
           <CategoryItem
             categoryColor={categoryColor}
-            categoryInfo={transaction.category}
+            categoryInfo={
+              transaction.type === "Difference"
+                ? {
+                    id: undefined,
+                    name: "Difference",
+                    isDeleted: false,
+                    type: transaction.amount > 0 ? "Income" : "Expense",
+                  }
+                : transaction.category
+            }
             emoji={emoji}
           />
         </View>

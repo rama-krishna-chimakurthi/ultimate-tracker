@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import {
   assetGroupTableName,
   assetTableName,
-  transactionTabelName,
+  transactionTableName,
 } from "../model/constants";
 
 import AssetGroupView from "../components/AssetGroupView";
@@ -67,8 +67,8 @@ const AssetsScreen = () => {
       SELECT ${assetTableName}.id, COALESCE(SUM(CASE WHEN from_asset = ${assetTableName}.id THEN amount ELSE 0 END), 0) AS totalExpenses,
               COALESCE(SUM(CASE WHEN to_asset = ${assetTableName}.id THEN amount ELSE 0 END), 0) AS totalIncome
       FROM ${assetTableName}
-      join ${transactionTabelName}
-      on ${transactionTabelName}.from_asset = ${assetTableName}.id or ${transactionTabelName}.to_asset = ${assetTableName}.id
+      join ${transactionTableName}
+      on ${transactionTableName}.from_asset = ${assetTableName}.id or ${transactionTableName}.to_asset = ${assetTableName}.id
       group by ${assetTableName}.id
       `
     );
@@ -77,39 +77,12 @@ const AssetsScreen = () => {
   };
 
   const insertAsset = async (asset: FinanceAsset) => {
-    if (asset.id > 0) {
-      /* db.withTransactionAsync(async () => {
-        await db.runAsync(
-          `UPDATE ${transactionTabelName} SET amount =?, description =?, category_id =?, date =?, type=?, from_asset=?, to_asset=?, name=? WHERE id =?`,
-          [
-            transaction.amount,
-            transaction.description,
-            transaction.category_id,
-            transaction.date,
-            transaction.type,
-            transaction.from_asset ? transaction.from_asset : null,
-            transaction.to_asset ? transaction.to_asset : null,
-            transaction.name,
-            transaction.id,
-          ]
-        );
-        await getData();
-      }); */
-    } else {
-      await dataSource.getRepository(FinanceAsset).save(asset);
-      /* await db.withTransactionAsync(async () => {
-        await db.runAsync(
-          `
-          INSERT INTO ${assetTableName} (name, asset_group_id, settlement_day) VALUES (?, ?, ?);
-        `,
-          [
-            asset.name,
-            asset.asset_group_id,
-            asset.settlement_day ? asset.settlement_day : null,
-          ]
-        ); */
-      await getData();
+    if (asset.id < 0) {
+      asset.id = null;
+      console.log("New Asset Adding----");
     }
+    await dataSource.getRepository(FinanceAsset).save(asset);
+    await getData();
   };
 
   const toggleAssetDeletion = async (assetId: number, isDeleted: boolean) => {

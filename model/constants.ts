@@ -4,7 +4,7 @@ export const dbName = "ultimate-tracker.db";
 export const categoryTableName = "finance_categories";
 export const assetGroupTableName = "finance_asset_group";
 export const assetTableName = "finance_asset";
-export const transactionTabelName = "finance_transactions";
+export const transactionTableName = "finance_transactions";
 
 
 export const categoryColors: { [key: string]: string } = {

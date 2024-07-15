@@ -4,7 +4,7 @@ import {
   assetGroupTableName,
   assetTableName,
   categoryTableName,
-  transactionTabelName,
+  transactionTableName,
 } from "../model/constants";
 import TransactionList from "../components/TransactionList";
 import Card from "../components/ui/Card";
@@ -14,7 +14,7 @@ import { FinanceTransaction } from "../entities/FinanceTransaction";
 import { FinanceTransactionRepo } from "../repo/FinanceTransactionRepo";
 import { dataSource } from "../services/DataService";
 import { TransactionsByMonth } from "../model/types";
-import { Transaction } from "typeorm";
+import { Between, Transaction } from "typeorm";
 import { FinanceAsset } from "../entities/FinanceAsset";
 import { FinanceAssetGroup } from "../entities/FinanceAssetGroup";
 import { FinanceCategory } from "../entities/FinanceCategory";
@@ -30,12 +30,12 @@ const Home = () => {
     FinanceTransaction | undefined
   >(undefined);
 
-  /*   const [transactionsByMonth, setTransactionsByMonth] =
+  const [transactionsByMonth, setTransactionsByMonth] =
     useState<TransactionsByMonth>({
       totalExpenses: 0,
       totalIncome: 0,
     });
- */
+
   const transactionRepo = dataSource.getRepository(FinanceTransaction);
   const isFocused = useIsFocused();
 
@@ -108,20 +108,39 @@ const Home = () => {
     endOfMonth.setMilliseconds(endOfMonth.getMilliseconds() - 1);
 
     // Convert to Unix timestamps (seconds)
-    const startOfMonthTimestamp = Math.floor(startOfMonth.getTime() / 1000);
-    const endOfMonthTimestamp = Math.floor(endOfMonth.getTime() / 1000);
+    //const startOfMonthTimestamp = Math.floor(startOfMonth.getTime() / 1000);
+    //const endOfMonthTimestamp = Math.floor(endOfMonth.getTime() / 1000);
 
-    /* const transactionsByMonth = await db.getAllAsync<TransactionsByMonth>(
+    const queryRunner = dataSource.createQueryRunner();
+
+    /* const entityManager = dataSource.createEntityManager(queryRunner);
+
+    const transactionsByMonth = await entityManager.query(
       `
       SELECT
         COALESCE(SUM(CASE WHEN type = 'Expense' THEN amount ELSE 0 END), 0) AS totalExpenses,
         COALESCE(SUM(CASE WHEN type = 'Income' THEN amount ELSE 0 END), 0) AS totalIncome
-      FROM ${transactionTabelName}
-      WHERE date >= ? AND date <= ?;
+      FROM ${transactionTableName}
+      WHERE transaction_date >= ? AND transaction_date <= ?;
     `,
-      [startOfMonthTimestamp, endOfMonthTimestamp]
-    );
-    setTransactionsByMonth(transactionsByMonth[0]); */
+      [startOfMonth, endOfMonth]
+    ); */
+
+    const transactionsByMonth = await dataSource
+      .createQueryBuilder()
+      .select([
+        "COALESCE(SUM(CASE WHEN tr.type = 'Expense' THEN tr.amount ELSE 0 END), 0) AS totalExpenses",
+        "COALESCE(SUM(CASE WHEN tr.type = 'Income' THEN tr.amount ELSE 0 END), 0) AS totalIncome",
+      ])
+      .from(transactionTableName, "tr")
+      .where({
+        transactionDate: Between(startOfMonth, endOfMonth),
+      })
+      .execute();
+
+    console.log("transactionsByMonth - ", transactionsByMonth);
+
+    setTransactionsByMonth(transactionsByMonth[0]);
 
     console.log("Done! 🔥");
   };
@@ -148,10 +167,10 @@ const Home = () => {
             getData();
           }}
         />
-        {/* <TransactionSummary
+        <TransactionSummary
           totalExpenses={transactionsByMonth.totalExpenses}
           totalIncome={transactionsByMonth.totalIncome}
-        /> */}
+        />
         <TransactionList
           transactions={transactions}
           deleteTransaction={deleteTransaction}
