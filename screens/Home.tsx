@@ -111,7 +111,7 @@ const Home = () => {
     //const startOfMonthTimestamp = Math.floor(startOfMonth.getTime() / 1000);
     //const endOfMonthTimestamp = Math.floor(endOfMonth.getTime() / 1000);
 
-    const queryRunner = dataSource.createQueryRunner();
+    // const queryRunner = dataSource.createQueryRunner();
 
     /* const entityManager = dataSource.createEntityManager(queryRunner);
 

@@ -6,6 +6,7 @@ import { VictoryPie } from "victory-native";
 import Card from "../components/ui/Card";
 import { useIsFocused } from "@react-navigation/native";
 import { dataSource } from "../services/DataService";
+import { FinanceTransaction } from "../entities/FinanceTransaction";
 
 const CategoriesScreen = () => {
   const [categorysSummary, setCategoriesSummary] = useState<
@@ -15,17 +16,6 @@ const CategoriesScreen = () => {
     []
   );
   const [dataIncomes, setDataIncome] = useState<{ x: string; y: number }[]>([]);
-
-  const query = `
-  SELECT
-    finance_categories.name, finance_categories.id,
-      COALESCE(SUM(CASE WHEN finance_transactions.type = 'Expense' THEN amount ELSE 0 END), 0) AS totalExpenses,
-      COALESCE(SUM(CASE WHEN finance_transactions.type = 'Income' THEN amount ELSE 0 END), 0) AS totalIncome
-  FROM finance_transactions
-  JOIN finance_categories
-  ON finance_categories.id = finance_transactions.category_id
-  WHERE finance_transactions.transaction_date >= ? AND finance_transactions.transaction_date <= ?
-  GROUP BY finance_categories.name`;
 
   const isFocused = useIsFocused();
 
@@ -52,10 +42,39 @@ const CategoriesScreen = () => {
 
     const queryRunner = dataSource.createQueryRunner();
 
-    const result: SumOfTransactionsByMonth[] = await queryRunner.query(query, [
+    const query = `
+      SELECT
+        finance_categories.name, finance_categories.id,
+          COALESCE(SUM(CASE WHEN finance_transactions.type = 'Expense' THEN amount ELSE 0 END), 0) AS totalExpenses,
+          COALESCE(SUM(CASE WHEN finance_transactions.type = 'Income' THEN amount ELSE 0 END), 0) AS totalIncome
+      FROM finance_transactions
+      JOIN finance_categories
+      ON finance_categories.id = finance_transactions.category_id
+      WHERE finance_transactions.transaction_date >= ? AND finance_transactions.transaction_date <= ?
+      GROUP BY finance_categories.name
+    `;
+
+    const result: SumOfTransactionsByMonth[] = await dataSource
+      .getRepository(FinanceTransaction)
+      .createQueryBuilder("finance_transactions")
+      .select([
+        "finance_categories.name as name",
+        "finance_categories.id as id",
+        "COALESCE(SUM(CASE WHEN finance_transactions.type = 'Expense' THEN amount ELSE 0 END), 0) AS totalExpenses",
+        "COALESCE(SUM(CASE WHEN finance_transactions.type = 'Income' THEN amount ELSE 0 END), 0) AS totalIncome",
+      ])
+      .innerJoinAndSelect("finance_transactions.category", "finance_categories")
+      .where(
+        "finance_transactions.transaction_date >= :fromDate AND finance_transactions.transaction_date <= :endDate",
+        { endDate: endOfMonth, fromDate: startOfMonth }
+      )
+      .groupBy("finance_categories.name")
+      .execute();
+
+    /* queryRunner.query(query, [
       startOfMonthTimestamp,
       endOfMonthTimestamp,
-    ]);
+    ]); */
 
     console.log(result);
     setCategoriesSummary(result);

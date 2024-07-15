@@ -20,6 +20,7 @@ import { FinanceTransaction } from "../entities/FinanceTransaction";
 import { FinanceCategory } from "../entities/FinanceCategory";
 import { dataSource } from "../services/DataService";
 import { FinanceAsset } from "../entities/FinanceAsset";
+import { useIsFocused } from "@react-navigation/native";
 
 const transactionTypes = ["Expense", "Income", "Transfer", "Difference"];
 
@@ -42,7 +43,7 @@ export default function AddTransaction({
 
   /* Category */
   const [categorySelected, setCategorySelected] = useState<string>("");
-  const [categoryId, setCategoryId] = useState<number>(0);
+  const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
 
   const [allAssets, setAllAssets] = useState<FinanceAsset[]>([]);
 
@@ -62,12 +63,17 @@ export default function AddTransaction({
     useState<boolean>(false);
 
   const [typeOfTransaction, setTypeOfTransaction] = useState<string>("Expense");
+  const isFocused = useIsFocused();
 
   useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
+
     getAssets();
     getExpenseType(currentTab);
     resetTransaction();
-  }, []);
+  }, [isFocused]);
 
   const getAssets = async () => {
     const result = await dataSource.getRepository(FinanceAsset).find({});
@@ -84,7 +90,7 @@ export default function AddTransaction({
       setAmount(transaction.amount.toString());
       setDescription(transaction.description);
       setName(transaction.name);
-      setCategoryId(transaction.category.id);
+      setCategoryId(transaction.category?.id);
       setCurrentTab(
         transactionTypes.findIndex((tr) => tr === transaction.type)
       );
@@ -119,13 +125,13 @@ export default function AddTransaction({
     setDescription("");
     setName("");
     setTypeOfTransaction("Expense");
-    setCategoryId(1);
+    setCategoryId(undefined);
     setCurrentTab(0);
     setIsAddingTransaction(false);
     setFromAssetSelected("");
-    setFromAssetId(0);
+    setFromAssetId(undefined);
     setToAssetSelected("");
-    setToAssetId(0);
+    setToAssetId(undefined);
     setDate(new Date());
     setIsDatePickerVisible(false);
     setIsTimePickerVisible(false);
